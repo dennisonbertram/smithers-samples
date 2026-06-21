@@ -2,6 +2,10 @@
 
 > A workflow fans out three tasks in parallel, pauses for a human approval gate, conditionally runs a gated task only after approval, then demonstrates that named facts written to the memory store survive across independent workflow runs.
 
+## In plain language
+
+Imagine an automated pipeline that starts several background jobs at once, then stops and asks a human "are you sure?" before continuing with a sensitive step. That is exactly what this example does: it kicks off three tasks simultaneously (capped at two at a time), halts and waits for a person to type `approve`, and only then runs the step that was being held back. It also writes a small note to a local database file and shows that the note is still there the next time the workflow runs — proving the system remembers things across separate runs, not just within a single session. You would reach for this pattern any time you need a human checkpoint inside an otherwise automated process, such as deploying code, sending bulk notifications, or approving a financial transaction before it goes through.
+
 **Teaches:** `Parallel` (maxConcurrency), `Sequence`, `Task`, `Approval` (HITL), `ctx.outputMaybe` conditional scheduling, `createMemoryStore`, durability (pause/resume), exit code 3
 **Prerequisites:** Bun ≥ 1.3 · none (keyless — no LLM calls, all static tasks)
 

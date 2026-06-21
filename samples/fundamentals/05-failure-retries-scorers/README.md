@@ -2,6 +2,10 @@
 
 > Shows how Smithers records failure history, routes to catch/finally branches, and attaches automated evaluators to agent tasks — the operational seams needed for unattended workflows.
 
+## In plain language
+
+This example intentionally breaks a step, then watches the system recover: a task is set up to always fail, so you can see the retry fire, the "catch" handler run, and the "finally" cleanup run — just like try/catch/finally in ordinary code, but wired into a workflow that logs everything to a local database file. A second task asks an AI model a question and then automatically grades its own answer for correctness and speed, storing those scores alongside the result. If you're building any automated process that runs without a human watching — a nightly job, a data pipeline, an AI agent — this shows you how to make failures visible, recoverable, and measurable.
+
 **Teaches:** TryCatchFinally, retries, continueOnFail, AnthropicAgent, schemaAdherenceScorer, latencyScorer, event stream, `_smithers_attempts`, `_smithers_scorers`
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 

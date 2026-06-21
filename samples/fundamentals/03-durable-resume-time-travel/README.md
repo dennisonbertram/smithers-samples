@@ -2,6 +2,10 @@
 
 > Kill a workflow mid-flight, resume it, and prove that finished tasks are never re-executed — then branch off a historical frame.
 
+## In plain language
+
+This example runs two steps in sequence, then lets you force-quit the program while the second step is still sleeping. When you restart it, the orchestrator checks a local database file it keeps, sees that step one already finished, and picks up from step two — without re-doing any work. It is like power-cycling a dishwasher mid-cycle and having it resume from where it left off rather than starting over from scratch. The "time travel" part lets you branch off a snapshot taken right after step one, so you can re-run the rest of the workflow from that exact point — useful for replaying or debugging a long job without re-running the expensive parts you already trust.
+
 **Teaches:** `Sequence`, `Task` (static + compute), `createSmithers`, durability, kill+resume, `timeline`, `fork` (time travel)
 **Prerequisites:** Bun ≥ 1.3 · none (keyless)
 

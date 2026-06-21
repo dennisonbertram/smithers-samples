@@ -2,6 +2,10 @@
 
 > Run a minimal TSX workflow end-to-end and confirm Smithers persists every task result to SQLite.
 
+## In plain language
+
+You pass in a name (say, "World"), and the program greets it back ("Hello, World") — but the interesting part is what happens invisibly: every result gets automatically saved to a local database file on disk, so the run is durable and inspectable after the fact. Think of it like a simple script, except the output is written to a ledger you can query later instead of just printing and disappearing. This is the "does it even work?" sanity check you run first — proving the engine starts, runs a step, and stores the result, all with zero API keys or cloud accounts.
+
 **Teaches:** Workflow, Sequence, Task, outputs schema (Zod), SQLite persistence, `smithers up` CLI
 **Prerequisites:** Bun ≥ 1.3 · none (keyless)
 

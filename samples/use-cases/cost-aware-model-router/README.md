@@ -2,6 +2,10 @@
 
 > Route LLM tasks to the cheapest model that meets your quality bar, escalate only when the cheap answer fails.
 
+## In plain language
+
+You hand this workflow a list of questions or tasks. It first tries to answer each one using a small, cheap AI model — the equivalent of asking an intern. A more capable model then double-checks the answer; if it's good enough, you're done and paid almost nothing. Only when the cheap answer falls short does the workflow automatically retry with a more expensive model, and it tracks exactly how much each escalation cost you. This solves a real cost problem: today most AI applications blindly route every request to the best (priciest) model, even when a much cheaper one would have done the job just fine.
+
 **Teaches:** AnthropicAgent, Task (agent + compute + static), Branch (nested 3-way), Parallel, Sequence, ctx.outputMaybe, ctx.runId, llmJudge scorer, bun:sqlite event-stream query
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 

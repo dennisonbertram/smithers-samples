@@ -2,6 +2,10 @@
 
 > A durable data pipeline that fetches real commits, enriches them with LLM risk classification, loads a warehouse row, and automatically rolls it back if a downstream step fails — leaving the database in a clean, consistent state.
 
+## In plain language
+
+This example pulls recent code commits from a real GitHub repository, asks an AI model to rate how risky the changes look, then writes that summary into a local database file. The interesting part is what happens when something goes wrong midway: instead of leaving the database in a half-updated mess, the pipeline automatically erases its own partial work — like a chef who cleans the cutting board before leaving if the dish has to be abandoned. This solves a common headache in data engineering where a failed step silently corrupts your records, forcing manual cleanup later.
+
 **Teaches:** `Saga`, `Task` (compute + agent), `AnthropicAgent`, `Sequence`, `createSmithers` typed outputs, compensating transactions, durability
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY` (GitHub API is keyless)
 

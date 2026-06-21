@@ -18,6 +18,27 @@ bunx --bun smithers-orchestrator up workflow.tsx --input '{"name":"world"}'
 sqlite3 smithers.db "SELECT * FROM hello;"   # -> <runId>|greet|0|Hello, world
 ```
 
+## What these examples do — in plain language
+
+New to Smithers? Here's each sample in one plain sentence. (Every sample folder also has
+its own **"In plain language"** section up top.)
+
+**Fundamentals — learn the engine**
+- **[01-hello-smoke](samples/fundamentals/01-hello-smoke)** — Pass in a name, get a greeting back, and confirm the result is automatically saved to a local file — the "does it even run?" check you do first.
+- **[02-agent-structured-output](samples/fundamentals/02-agent-structured-output)** — Feed a news article to an AI and get back a clean, structured classification (category, sentiment, topics, summary) saved to disk — no manual JSON wrangling.
+- **[03-durable-resume-time-travel](samples/fundamentals/03-durable-resume-time-travel)** — Force-quit a workflow mid-run and restart it: finished steps are skipped and only the unfinished work re-runs — completed work is never lost or repeated.
+- **[04-control-flow-hitl-memory](samples/fundamentals/04-control-flow-hitl-memory)** — Run several tasks at once, pause for a human to click "approve," then continue — and remember facts across separate runs.
+- **[05-failure-retries-scorers](samples/fundamentals/05-failure-retries-scorers)** — Make a workflow survive failure gracefully: retry a broken step, run cleanup handlers, and automatically grade an AI task's output for correctness and speed.
+- **[06-eval-harness](samples/fundamentals/06-eval-harness)** — Run a list of test cases against a live AI workflow and save a pass/fail report, so you catch regressions before they reach production.
+
+**Use-cases — real-world workflows**
+- **[cost-aware-model-router](samples/use-cases/cost-aware-model-router)** — Try each task on the cheapest AI model first and only escalate to a pricier one when the cheap answer fails a quality check — then report exactly what that saved you.
+- **[multi-agent-code-review](samples/use-cases/multi-agent-code-review)** — Send a code change to three AI reviewers at once, have a judge AI combine their findings, and require a human to approve before anything is "posted."
+- **[content-quality-loop](samples/use-cases/content-quality-loop)** — An AI writer and an AI editor take turns on a draft, revising until the writing scores above your quality bar (or it runs out of tries).
+- **[resilient-etl-saga](samples/use-cases/resilient-etl-saga)** — Fetch real GitHub commits, have an AI rate their risk, save the results — and automatically clean up its own partial writes if anything fails midway.
+- **[degree-builder-workflow](samples/use-cases/degree-builder-workflow)** — Give it a topic and it researches, plans, and writes a whole multi-folder knowledge-base project to disk — and picks up where it left off if interrupted.
+- **[durable-fix-until-green](samples/use-cases/durable-fix-until-green)** — An AI fixes a broken file by running the tests in a loop until they all pass, and can resume right where it left off if the process is killed.
+
 ## Prerequisites
 
 - **[Bun](https://bun.sh) ≥ 1.3** — Smithers runs on Bun (`bunx --bun smithers-orchestrator …`).

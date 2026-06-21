@@ -2,6 +2,10 @@
 
 > Three specialist AI reviewers fan out in parallel, a judge synthesizes their findings, and a human must approve before any review is posted — all in one durable, resumable workflow.
 
+## In plain language
+
+You feed this workflow a code diff and it dispatches three AI reviewers at the same time — one looking for bugs, one checking for security problems, one reviewing style — then a fourth AI reads all three reports and writes a single consolidated verdict. The whole run then pauses and waits for a real human to say "post it" or "hold it" before anything is published, with a record of who decided and when saved to a local database file regardless of outcome. This solves the problem of AI-generated code reviews going out unchecked: you get the speed of parallel AI analysis with a mandatory human sign-off before the feedback ever reaches a developer.
+
 **Teaches:** `AnthropicAgent`, `Parallel`, `Sequence`, `Task`, `Approval` (HITL), conditional rendering, `ctx.outputMaybe`, durability / resume-without-replay
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 

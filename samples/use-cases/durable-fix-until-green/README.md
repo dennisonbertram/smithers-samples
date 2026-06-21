@@ -2,6 +2,10 @@
 
 > An AI agent that automatically fixes a TypeScript bug by looping until all tests go green — and survives process death via durable resume.
 
+## In plain language
+
+You hand it a file with a bug in it and a test suite that is currently failing. The AI reads the broken code, makes a fix, runs the tests, and if they still fail it tries again — up to five times — until every test passes. The real magic is the crash-recovery: if the program is killed mid-run, it can pick up exactly where it stopped without redoing any work it already finished. This solves the very common frustration of a long automated task being interrupted and having to start over from scratch.
+
 **Teaches:** AnthropicAgent, Loop, Sequence, Task (compute), `createSmithers` output schemas, durability / resume, `ctx.latest`
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 

@@ -2,6 +2,10 @@
 
 > Run a JSON test suite against a live Smithers workflow and assert the results with a TDD red→green cycle.
 
+## In plain language
+
+You write a list of test cases — each one says "send this input to the AI workflow and expect the output to contain this" — and then run a single command that fires real model calls, checks every case, and saves a structured results file. The idea is the same as unit tests for regular code: run before your change to confirm things are broken (red), make your change, run again to confirm they pass (green). This is especially useful when your AI workflow's behavior might drift over time — you keep a repeatable record that the model actually said what you expected.
+
 **Teaches:** AnthropicAgent, Task, Sequence, `smithers eval`, eval cases (`outputContains`), eval report shape, TDD red→green
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 

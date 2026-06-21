@@ -2,6 +2,10 @@
 
 > An AI writer revises a content draft until a separate AI judge scores it above a threshold — proving multi-iteration refinement with a durable loop.
 
+## In plain language
+
+You give this workflow a writing brief (topic, audience, required points) and a quality bar (say, a score of 85 out of 100). One AI agent writes a draft; a second AI agent reads it and scores it like a tough editor, giving a numeric grade and specific notes on what to fix. If the draft falls short, the writer sees the critique and tries again — automatically — until the score clears the bar or a maximum number of attempts is reached. Every draft and every critique get saved to a local database file so you can replay the whole revision history afterward. This is the pattern to reach for when a single AI pass isn't good enough and you want the system to self-correct until the output meets a defined standard.
+
 **Teaches:** `Loop` (until + maxIterations + onMaxReached), `Sequence`, `Task`, `AnthropicAgent`, `ctx.latest`, `llmJudge` scorer, SQLite output tables, scorer observability side-channel  
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 

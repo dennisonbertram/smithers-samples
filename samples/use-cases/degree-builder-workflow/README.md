@@ -2,6 +2,12 @@
 
 > Two AI agents research a topic and plan a learning ladder; five compute Tasks materialize a 42-file directory skeleton to disk — and a kill-and-resume proves that finished Tasks are never re-executed.
 
+## In plain language
+
+You give this workflow a tool or technology name (say, "redis"), and it automatically produces a ready-to-use folder of 42 structured files — research notes, a skill progression plan, and stub documents for each learning level — by calling an AI twice and then writing the results to disk. Think of it like hiring a librarian who reads everything about a topic, drafts a curriculum, and files every document in labeled folders, all while you wait about 90 seconds.
+
+The more interesting trick is what happens if you pull the plug halfway through: when you restart with the same run ID, the workflow picks up exactly where it left off, skipping any steps that already finished. This solves a real headache in long-running AI pipelines — wasted time and money re-running expensive steps after a crash or timeout.
+
 **Teaches:** AnthropicAgent, Task (compute), Sequence, structured output (Zod schemas), durability / resume, agent-to-compute data flow, `ctx.outputMaybe`, red→green env-gate pattern
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 

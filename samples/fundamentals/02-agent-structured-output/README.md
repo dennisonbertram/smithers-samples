@@ -2,6 +2,10 @@
 
 > Drive a live Claude call, validate its JSON response against a Zod schema, and persist the typed result to SQLite — all in a single `<Task>`.
 
+## In plain language
+
+You feed in a raw news article, and the workflow asks Claude to read it and fill out a structured "form" — category, sentiment, confidence score, key topics, and a one-sentence summary. The framework checks that Claude's answer actually matches that form (right fields, right types) before saving the completed row to a local database file. This solves a very common AI problem: getting a language model to reliably return machine-readable data instead of free-form prose you'd have to parse yourself.
+
 **Teaches:** `AnthropicAgent`, `Task` (structured output), `Sequence`, `createSmithers` output schemas, durability (SQLite persistence)
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 
