@@ -2,7 +2,7 @@
 
 > Three specialist AI reviewers fan out in parallel, a judge synthesizes their findings, and a human must approve before any review is posted — all in one durable, resumable workflow.
 
-## In plain language
+## TL;DR
 
 You feed this workflow a code diff and it dispatches three AI reviewers at the same time — one looking for bugs, one checking for security problems, one reviewing style — then a fourth AI reads all three reports and writes a single consolidated verdict. The whole run then pauses and waits for a real human to say "post it" or "hold it" before anything is published, with a record of who decided and when saved to a local database file regardless of outcome. This solves the problem of AI-generated code reviews going out unchecked: you get the speed of parallel AI analysis with a mandatory human sign-off before the feedback ever reaches a developer.
 
@@ -120,3 +120,16 @@ The workflow in `workflow.tsx` has four stages wired as a `<Sequence>`:
 **`onDeny="skip"` still runs downstream conditional tasks.** With `onDeny="skip"`, a denial resolves `gateDecision` with `approved=false` (not null), so the `{decision ? <Task/> : null}` condition is true and `post-review` executes. This is intentional for audit-trail systems: the denial is recorded, not ignored.
 
 **`totalFindings` is the judge's self-reported estimate.** The `synthesisVerdict.totalFindings` field is stored as `z.string()` (not a number) to avoid integer truncation. Its value is the judge LLM's own count of findings after synthesis, which may differ from the raw count across the three reviewer tables. Treat it as an estimate from the model, not a verified tally.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+This sample teaches the parallel-fan-out + synthesis + HITL gate pattern: how to run independent AI specialists concurrently, merge their structured outputs through a judge agent, and insert a mandatory human decision point before any side effect executes — all with Smithers' built-in durability so the LLM work is never replayed on resume.
+
+**How to apply it to your own project**
+
+- **Real PR review bot.** Replace the hardcoded diff string with a live diff fetched from the GitHub API (a pull_request webhook → `octokit.pulls.get`). Add a `license-compliance` reviewer agent alongside the existing three. After the approval gate, post the judge's verdict as a GitHub PR review comment via `octokit.pulls.createReview` instead of writing to SQLite.
+- **Security-gated CI step.** Feed the workflow a SAST tool's JSON output (e.g., Semgrep results) as the "diff". Replace the style reviewer with a "false-positive filter" agent. Wire the approval gate to a Slack message so the on-call engineer approves or denies from their phone before the pipeline proceeds to deploy.
+- **Multi-reviewer document or prompt approval.** Swap the code diff for a draft prompt, policy document, or marketing copy. Point each specialist at a different concern (factual accuracy, tone, compliance). The gate then requires a human content lead to sign off before the copy is published or the prompt is promoted to production.
+- **Auditable AI action in any domain.** The core pattern — parallel agents → judge → HITL gate → conditional side effect with an audit row written regardless of outcome — applies to any workflow where an AI recommendation must be human-authorized before it causes a real-world change (sending an email, merging a branch, updating a database record).

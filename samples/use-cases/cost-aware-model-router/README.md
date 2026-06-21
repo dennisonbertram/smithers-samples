@@ -2,7 +2,7 @@
 
 > Route LLM tasks to the cheapest model that meets your quality bar, escalate only when the cheap answer fails.
 
-## In plain language
+## TL;DR
 
 You hand this workflow a list of questions or tasks. It first tries to answer each one using a small, cheap AI model — the equivalent of asking an intern. A more capable model then double-checks the answer; if it's good enough, you're done and paid almost nothing. Only when the cheap answer falls short does the workflow automatically retry with a more expensive model, and it tracks exactly how much each escalation cost you. This solves a real cost problem: today most AI applications blindly route every request to the best (priciest) model, even when a much cheaper one would have done the job just fine.
 
@@ -114,3 +114,16 @@ The pattern is `{async () => { return row; }}`. Writing `{(async () => { return 
 
 **Schema fields named `nodeId` conflict with Smithers' system column.**
 Smithers writes a `node_id` column to every output table. If your Zod schema includes a field called `nodeId`, it maps to the same column and the run fails with `duplicate column name: node_id`. Use a different name (e.g., `taskId`) for any application-level id field.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+This example teaches the cheap-first escalation pattern: try the lowest-cost model first, score the result against a configurable quality bar, and promote to a more capable model only on failure. The key primitives are nested `<Branch>` for the multi-way escalation decision, `llmJudge` for numeric quality scoring, and a compute `Task` that reads the live `_smithers_events` token-usage stream to produce a real cost ledger. The pattern generalises to any task where a capable-but-expensive model is the last resort, not the default.
+
+**How to apply it to your own project**
+
+- **Support ticket triage:** Replace the demo questions with your real support tickets fetched from an API. Route simple, FAQ-style queries to a haiku-class model and escalate only when the answer scores below your confidence threshold — dramatically cutting per-ticket inference cost.
+- **RAG answer generation:** Feed document-grounded Q&A through the same cheap-first pipeline. Tune `qualityBar` based on downstream metrics (user thumbs-down rate, escalation rate) rather than a fixed number, and add a hard budget cap (`maxCost`) that stops escalation once a run-level dollar limit is reached.
+- **Batch content moderation:** Pass candidate content items in parallel through a small classifier first; escalate ambiguous cases (score near the decision boundary) to a stronger model for a second opinion. The durable escalation records give you an audit trail for every moderation decision.
+- **Code generation quality gate:** Use the verifier stage to run a lightweight static-analysis or unit-test pass on haiku-generated code before deciding whether to escalate to sonnet or opus. Pair with the `llmJudge` scorer to capture structured feedback (correctness, style, security) alongside the pass/fail decision.

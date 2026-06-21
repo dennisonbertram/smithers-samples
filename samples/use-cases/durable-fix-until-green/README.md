@@ -2,7 +2,7 @@
 
 > An AI agent that automatically fixes a TypeScript bug by looping until all tests go green — and survives process death via durable resume.
 
-## In plain language
+## TL;DR
 
 You hand it a file with a bug in it and a test suite that is currently failing. The AI reads the broken code, makes a fix, runs the tests, and if they still fail it tries again — up to five times — until every test passes. The real magic is the crash-recovery: if the program is killed mid-run, it can pick up exactly where it stopped without redoing any work it already finished. This solves the very common frustration of a long automated task being interrupted and having to start over from scratch.
 
@@ -111,3 +111,16 @@ The loop exit condition is evaluated at the top of each iteration via `ctx.lates
 2. **Use `z.string()` for numeric counts, not `z.number()`.** Smithers maps `z.number()` to SQLite INTEGER, which silently truncates fractions and can cause type confusion. This sample stores `passCount` and `failCount` as strings to avoid surprises.
 
 3. **Killed attempt → `cancelled`, not `failed`.** When the process is killed, Smithers marks the in-flight attempt as `cancelled` (heartbeat went stale). Resume creates a new attempt without consuming a retry slot — retries are for validation failures, not process death.
+
+## What you'll learn & how to apply it
+
+### What you'll learn
+
+This sample teaches the **durable retry loop** pattern: wrapping an AI agent and a validation step inside a `<Loop>` so the agent keeps trying until a measurable criterion is met, with Smithers persisting every attempt to SQLite so the run can survive a crash and resume without re-doing completed work. The key primitives are `<Loop until={condition} maxIterations={n}>`, `ctx.latest(...)` for reading the current iteration's output, and Smithers' heartbeat-based `cancelled`-vs-`failed` distinction.
+
+### How to apply it to your own project
+
+- **CI auto-repair pipeline.** Point the `implement` agent at a real failing test suite in your repo (fetched via the GitHub API or a local checkout). On each iteration, the agent patches the source files, the compute task runs your actual test command (`pytest`, `cargo test`, `jest`), and the loop exits when all tests pass. Gate merges on a `passed: true` result stored in SQLite.
+- **Linter / type-error fix loop.** Replace `bun test` with `tsc --noEmit` or `eslint --max-warnings 0`. The agent reads the compiler output and applies targeted fixes; the loop exits when the tool exits zero. This is especially useful for automated dependency-upgrade PRs that break types.
+- **Infra provisioning with verification.** Wrap a Terraform `apply` + `validate` pair in the loop. The agent interprets plan errors and adjusts `.tf` files; the compute task confirms the target resource is reachable before exiting. Kill-and-resume guarantees you never re-run a partially applied plan.
+- **Data-quality ETL retry.** Swap the coding tools for data-transformation logic. The agent rewrites a failing SQL migration or transformation script; the compute task runs row-count and constraint checks. The durable resume is valuable here because data jobs are often interrupted by timeouts or quota limits.

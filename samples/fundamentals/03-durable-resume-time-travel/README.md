@@ -2,7 +2,7 @@
 
 > Kill a workflow mid-flight, resume it, and prove that finished tasks are never re-executed — then branch off a historical frame.
 
-## In plain language
+## TL;DR
 
 This example runs two steps in sequence, then lets you force-quit the program while the second step is still sleeping. When you restart it, the orchestrator checks a local database file it keeps, sees that step one already finished, and picks up from step two — without re-doing any work. It is like power-cycling a dishwasher mid-cycle and having it resume from where it left off rather than starting over from scratch. The "time travel" part lets you branch off a snapshot taken right after step one, so you can re-run the rest of the workflow from that exact point — useful for replaying or debugging a long job without re-running the expensive parts you already trust.
 
@@ -120,3 +120,16 @@ The `fork` command reads frame 2 (the delta recorded after Task A finished), cop
 2. **Wait 35+ seconds after SIGKILL before resuming.** After a SIGKILL the run remains `status=running` in `_smithers_runs`. Smithers uses a heartbeat; until that heartbeat goes stale (~30s), `--resume true` is rejected with `code: RUN_STILL_RUNNING`. The `--force` flag does NOT bypass this check.
 
 3. **Do not modify `durability.tsx` between the initial run and resume.** Smithers stores a hash of the workflow source on first run. Any change to the file causes `--resume true` to be blocked with `code: RESUME_METADATA_MISMATCH`.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+This example teaches Smithers' core durability primitive: how a workflow's state is check-pointed to SQLite frame-by-frame so that a killed process can resume exactly where it left off — skipping completed tasks, retrying the interrupted one, and never double-executing finished work. It also covers time travel: forking a new run from any historical frame so you can replay or debug from a trusted mid-workflow checkpoint without re-running expensive earlier steps.
+
+**How to apply it to your own project**
+
+- **Long-running data pipelines.** Replace `task-b-slow` with a real ETL step (e.g. a large S3 export, a database migration, or a model fine-tune job). If the host crashes or you need to scale down, resume the run from the last finished step rather than re-running the whole pipeline from scratch.
+- **Multi-stage CI/CD or build jobs.** Model each build stage (compile, test, deploy) as a `<Task>` in a `<Sequence>`. A transient infra failure mid-deploy lets you resume from the failed stage instead of re-running compile and test.
+- **Debugging expensive workflows.** Use `fork --frame N` to branch off a snapshot taken just before the step you are iterating on. Tweak the task logic, replay only that tail of the workflow, and discard the fork — without burning time or money re-running the trusted upstream steps.
+- **Audit and replay for compliance.** The frame timeline is a tamper-evident log of exactly what ran, when, and with what output. Point `timeline --tree` at a production run to reproduce the exact execution state at any point in time — useful for incident post-mortems or regulated workflows that require replay evidence.

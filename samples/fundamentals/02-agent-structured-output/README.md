@@ -2,7 +2,7 @@
 
 > Drive a live Claude call, validate its JSON response against a Zod schema, and persist the typed result to SQLite — all in a single `<Task>`.
 
-## In plain language
+## TL;DR
 
 You feed in a raw news article, and the workflow asks Claude to read it and fill out a structured "form" — category, sentiment, confidence score, key topics, and a one-sentence summary. The framework checks that Claude's answer actually matches that form (right fields, right types) before saving the completed row to a local database file. This solves a very common AI problem: getting a language model to reliably return machine-readable data instead of free-form prose you'd have to parse yourself.
 
@@ -77,3 +77,16 @@ Two live runs on Smithers 0.24.2 (`56cda949`, `5be7eef2`) confirmed end-to-end: 
 2. **Model id errors surface as JSON validation failures, not `model-not-found`.** If the model name is wrong (e.g. `claude-fable-5`), Smithers receives no output from the API and reports: `Task "classify-article" expected structured JSON output, but the agent/model did not return valid JSON`. The root cause is `AI_NoOutputGeneratedError`. Use `claude-haiku-4-5` (live-verified).
 
 3. **Always `bun install` first and use `bunx --bun smithers-orchestrator`.** Running via a global `bunx` without a local install can pull in conflicting package versions and produce a React invalid-hook-call error. The `--bun` flag ensures Bun's resolver uses the locally installed version.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+The core transferable skill here is using `createSmithers` output schemas to turn a free-form LLM response into a typed, validated, persisted record — without writing any parsing or validation glue yourself. You declare a Zod schema once, and the runtime handles prompt injection, JSON validation, retry on bad output, and SQLite persistence. This pattern applies any time you need a language model to produce machine-readable data reliably.
+
+**How to apply it to your own project**
+
+- **Document or form extraction.** Swap the news article for invoices, support tickets, or legal clauses. Define a schema with the fields you need (vendor, amount, due date, priority level), point the `AnthropicAgent` at your document text, and the classified rows land directly in your database — no regex or post-processing needed.
+- **API response enrichment.** Wrap calls to external APIs (GitHub issues, Jira tickets, customer feedback) in a `<Task>` that asks Claude to tag, score, or summarize each item. The Zod schema enforces that every row has the same shape before it hits your downstream pipeline.
+- **Content moderation or triage.** Replace the classifier fields with `risk_level`, `category`, and `requires_human_review`. Feed in user-generated content and let the workflow accumulate a typed moderation queue in SQLite; a separate worker reads the table and routes flagged rows.
+- **LLM-assisted data migration.** Use the structured output pattern to extract and normalize data from legacy free-text fields — the retries prop means a single ambiguous row doesn't abort the whole batch, and the `_smithers_attempts` table gives you an audit trail of which rows needed retries.

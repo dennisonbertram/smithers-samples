@@ -2,7 +2,7 @@
 
 > Shows how Smithers records failure history, routes to catch/finally branches, and attaches automated evaluators to agent tasks — the operational seams needed for unattended workflows.
 
-## In plain language
+## TL;DR
 
 This example intentionally breaks a step, then watches the system recover: a task is set up to always fail, so you can see the retry fire, the "catch" handler run, and the "finally" cleanup run — just like try/catch/finally in ordinary code, but wired into a workflow that logs everything to a local database file. A second task asks an AI model a question and then automatically grades its own answer for correctness and speed, storing those scores alongside the result. If you're building any automated process that runs without a human watching — a nightly job, a data pipeline, an AI agent — this shows you how to make failures visible, recoverable, and measurable.
 
@@ -101,3 +101,19 @@ The `createSmithers` call declares output schemas (`flaky_result`, `recovered`, 
 2. **`attempt` is 1-based in `_smithers_attempts`** — `retries={1}` means 1 retry on top of the initial attempt, producing rows with `attempt=1` and `attempt=2`. There is no `attempt=0`.
 
 3. **`ScorerStarted`/`ScorerFinished` events do NOT appear in the NDJSON stream log** — scorer results are only accessible via `scores <runId>`, `node <nodeId> --run-id <runId> --format json`, or the `_smithers_scorers` SQLite table directly.
+
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+- How to wrap any fallible node in `TryCatchFinally` so a workflow absorbs failures gracefully instead of halting — the same try/catch/finally contract you already know, but durable and logged to SQLite.
+- How `retries` controls total attempt count (not extra attempts), and how `_smithers_attempts` gives you a per-attempt audit trail for any node.
+- How to attach `schemaAdherenceScorer` and `latencyScorer` to an agent task so every run self-evaluates and persists quality metrics alongside results — without a separate evaluation harness.
+
+**How to apply it to your own project**
+
+- **Resilient nightly jobs or data pipelines.** Wrap your ETL fetch step in `TryCatchFinally`: the `catch` branch sends a Slack alert or writes a dead-letter record, the `finally` branch closes the DB connection or releases a lock. Set `retries={2}` on the fetch node to tolerate transient API timeouts.
+- **AI agent quality gates.** Add `schemaAdherenceScorer` to any `AnthropicAgent` task whose output must match a Zod schema (structured extraction, classification, slot-filling). If the score drops below 1.0 you know immediately — no manual spot-check needed.
+- **SLA monitoring for LLM calls.** Attach `latencyScorer({ targetMs: <your P95 budget> })` to high-stakes agent nodes. Query `_smithers_scorers` over time to detect model or prompt regressions before users do.
+- **Graceful degradation in multi-step pipelines.** Use `continueOnFail` on the `catch` task if your error-handler itself might fail (e.g., a secondary model call). The `finally` block then guarantees cleanup (temp-file deletion, span closure) runs regardless of how badly the primary path went.

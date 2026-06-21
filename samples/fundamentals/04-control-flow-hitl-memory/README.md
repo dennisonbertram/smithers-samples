@@ -2,7 +2,7 @@
 
 > A workflow fans out three tasks in parallel, pauses for a human approval gate, conditionally runs a gated task only after approval, then demonstrates that named facts written to the memory store survive across independent workflow runs.
 
-## In plain language
+## TL;DR
 
 Imagine an automated pipeline that starts several background jobs at once, then stops and asks a human "are you sure?" before continuing with a sensitive step. That is exactly what this example does: it kicks off three tasks simultaneously (capped at two at a time), halts and waits for a person to type `approve`, and only then runs the step that was being held back. It also writes a small note to a local database file and shows that the note is still there the next time the workflow runs — proving the system remembers things across separate runs, not just within a single session. You would reach for this pattern any time you need a human checkpoint inside an otherwise automated process, such as deploying code, sending bulk notifications, or approving a financial transaction before it goes through.
 
@@ -115,3 +115,16 @@ All output shapes are declared up front with `createSmithers({ ... })` using Zod
 2. **Conditional tasks require `ctx.outputMaybe`, not `ctx.output`.** Using `ctx.output` throws if the upstream node has not yet produced a result. `ctx.outputMaybe` returns `null` on the first render and the real value on resume — this is the correct pattern for tasks that depend on an `Approval` decision.
 
 3. **`createMemoryStore` is a sub-path import.** Import from `"smithers-orchestrator/memory"`, not from `"smithers-orchestrator"` directly. The same applies to any memory processors.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+This sample teaches three composable primitives: bounded parallel fan-out (`<Parallel maxConcurrency>`), a durable human-in-the-loop approval gate (`<Approval>` + `ctx.outputMaybe`), and a cross-run key/value memory store (`createMemoryStore`). Together they show how to build workflows that pause safely for human decisions, resume without re-running completed work, and carry state across independent process invocations.
+
+**How to apply it to your own project**
+
+- **CI/CD deployment gate.** Replace the three parallel tasks with real deployment steps (build, lint, integration tests). Keep the `<Approval>` gate before the production-push step — a human reviews test results and types `approve` before traffic is cut over. Use `createMemoryStore` to record the last known good SHA so a second run can skip already-validated assets.
+- **Bulk notification with a review checkpoint.** Fan out message rendering for hundreds of recipients in parallel (tune `maxConcurrency` to stay within rate limits), then pause for a marketing reviewer to spot-check a sample before the actual send task runs through the approval gate.
+- **Financial transaction pipeline.** Run fraud-score, compliance-check, and balance-validation tasks concurrently, then route through an `<Approval>` node that waits for a second approver before the transfer executes. Memory store can record per-account approval history for audit purposes.
+- **Data-migration saga with manual sign-off.** Parallelize schema-validation tasks across database shards, pause for a DBA to confirm row counts look correct, then resume the migration. The fact that completed tasks are not re-run on resume (Smithers reconciles persisted state) means you only pay for the work still left to do.

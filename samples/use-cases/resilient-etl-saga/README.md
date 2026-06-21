@@ -2,7 +2,7 @@
 
 > A durable data pipeline that fetches real commits, enriches them with LLM risk classification, loads a warehouse row, and automatically rolls it back if a downstream step fails — leaving the database in a clean, consistent state.
 
-## In plain language
+## TL;DR
 
 This example pulls recent code commits from a real GitHub repository, asks an AI model to rate how risky the changes look, then writes that summary into a local database file. The interesting part is what happens when something goes wrong midway: instead of leaving the database in a half-updated mess, the pipeline automatically erases its own partial work — like a chef who cleans the cutting board before leaving if the dish has to be abandoned. This solves a common headache in data engineering where a failed step silently corrupts your records, forcing manual cleanup later.
 
@@ -117,3 +117,16 @@ All output tables are declared upfront via `createSmithers({ ... })` with Zod sc
 2. **`onFailure="compensate"` gives `status: finished`, not `status: failed`.** The data-integrity proof lives in the SQLite rows, not the run status. If you need a non-zero exit code for CI, use `onFailure="compensate-and-fail"`.
 
 3. **Camelcase schema keys become snake_case column names.** `loadedCount` → `loaded_count`, `rolledBack` → `rolled_back`, `riskLevel` → `risk_level`. SQLite queries using camelCase column names will return "no such column". Run `.schema <table>` to confirm actual names before querying.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+The `Saga` primitive gives you declarative compensating transactions: each step declares an `action` and a `compensation`, and Smithers automatically runs compensations in reverse order for every step that already succeeded when a later step fails. This is the standard pattern for keeping distributed or multi-step data pipelines consistent without manual cleanup code — and it works even when the pipeline spans LLM enrichment, database writes, and external publish calls.
+
+**How to apply it to your own project**
+
+- **Event-driven ingestion pipeline.** Replace the GitHub commits fetch with a Kafka consumer or S3 event source. Keep the LLM enrichment stage for classification or summarization, swap the SQLite load for your real warehouse (Postgres, BigQuery, Snowflake), and use the compensation to `DELETE` or mark rows as `invalidated`. The rollback guarantee protects your warehouse from half-ingested batches when a downstream step (e.g., Pub/Sub publish, Slack notification, webhook delivery) fails.
+- **Multi-step order fulfillment.** Model each step — reserve inventory, charge payment, dispatch shipment — as a `Saga` action with a compensation (release reservation, issue refund, cancel dispatch). If shipment dispatch fails after payment succeeds, compensations fire automatically in reverse, leaving the order in a clean pre-payment state without bespoke rollback logic.
+- **AI-enriched data migration.** Use a `Saga` to migrate records from a legacy schema to a new one: action writes to the new table, compensation deletes the migrated row. Embed an LLM classification or transformation step between the read and write stages. If any record's transformation fails validation, the compensation removes partial writes so you can re-run the migration cleanly.
+- **CI/CD deployment pipeline.** Model deploy stages (build artifact, push to registry, update service, run smoke test) as saga steps. If the smoke test fails, the compensation can roll back the service to its previous image tag. The `onFailure="compensate-and-fail"` option ensures the CI job exits non-zero even though Smithers resolves the saga gracefully.

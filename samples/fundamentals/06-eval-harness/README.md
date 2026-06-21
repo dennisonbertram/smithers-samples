@@ -2,7 +2,7 @@
 
 > Run a JSON test suite against a live Smithers workflow and assert the results with a TDD red→green cycle.
 
-## In plain language
+## TL;DR
 
 You write a list of test cases — each one says "send this input to the AI workflow and expect the output to contain this" — and then run a single command that fires real model calls, checks every case, and saves a structured results file. The idea is the same as unit tests for regular code: run before your change to confirm things are broken (red), make your change, run again to confirm they pass (green). This is especially useful when your AI workflow's behavior might drift over time — you keep a repeatable record that the model actually said what you expected.
 
@@ -97,3 +97,16 @@ Verified run `20260617142037-bd99758c`: `smithers eval` invoked `claude-haiku-4-
 2. **`--force` is required to overwrite an existing report.** Without it the CLI exits immediately with `INVALID_INPUT` if the report file already exists. Always pass `--force` when re-running the same suite.
 
 3. **`--report` is the flag for the output path; `--output` is a global CLI format flag.** They are easy to confuse. Use `--report <path>` (or `-r`) to control where the JSON report is written.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+This sample teaches the Smithers eval harness pattern: how to define a JSON case file with input/expected pairs, run `smithers eval` to fire real model calls, and bracket the whole cycle with red/green test assertions. The transferable skill is regression-guarding any Smithers workflow — you get a repeatable, automatable record that the model behaves as expected, and you can add it to CI like any other test suite.
+
+**How to apply it to your own project**
+
+- **Regression-guard a production workflow.** Replace the greeting workflow with your real workflow (e.g., a document classifier or ticket router). Write cases that cover your critical paths and edge cases, commit the `eval-cases.json` alongside the workflow, and run `smithers eval` in CI on every PR.
+- **Catch prompt-drift over time.** Pin a `runLabel` from a known-good eval report and diff new reports against it. When a model update or prompt edit changes output, the `outputContains` assertions fail before users notice.
+- **Multi-language or multi-locale validation.** Extend the case file with one entry per supported locale or input variant. The eval runner fires them in parallel, so you get full coverage without writing per-locale test code.
+- **Integrate with a test runner gate.** Wire `green.test.ts` into your existing `bun test` / `vitest` suite so a broken eval report blocks the build — the same way a failing unit test does for regular code.

@@ -2,7 +2,7 @@
 
 > Two AI agents research a topic and plan a learning ladder; five compute Tasks materialize a 42-file directory skeleton to disk — and a kill-and-resume proves that finished Tasks are never re-executed.
 
-## In plain language
+## TL;DR
 
 You give this workflow a tool or technology name (say, "redis"), and it automatically produces a ready-to-use folder of 42 structured files — research notes, a skill progression plan, and stub documents for each learning level — by calling an AI twice and then writing the results to disk. Think of it like hiring a librarian who reads everything about a topic, drafts a curriculum, and files every document in labeled folders, all while you wait about 90 seconds.
 
@@ -148,3 +148,16 @@ The run stays in `status: running` for ~35s after the process dies. Attempting `
 
 **3. Use `z.string()` for all numeric output fields.**
 `z.number()` causes Smithers to create an `INTEGER` SQLite column, which silently truncates decimal values and causes schema issues. Use `z.string()` and `String(value)` at the return site.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+This example teaches the *durable scaffolding generator* pattern: how to chain AI agents with downstream compute Tasks so that expensive LLM calls produce structured JSON that compute Tasks materialise into real files — and how Smithers' run-ID-based resumability means a crash or timeout never forces you to re-pay for already-completed steps. The key reusable techniques are agent-to-compute data flow via `ctx.outputMaybe`, Zod-validated structured output as a contract between stages, and the red/green env-gate for safely testing destructive side-effects.
+
+**How to apply it to your own project**
+
+- **Project scaffolding generator** — replace the `target` input with a product spec (feature name, stack, team conventions) and swap the two `AnthropicAgent` tasks for ones that produce your own schema (e.g., a component tree and an API contract). The compute Tasks then write the real source files, config, and test stubs your team needs on day one of a new feature.
+- **Long-running data-prep pipeline** — use the same Sequence + compute-Task structure for an ETL job that calls an LLM to classify or enrich records in batches. If the job is killed halfway, resuming with the same `--run-id` skips finished batches, so you only pay for the remaining work.
+- **Documentation or report generation** — point the research `AnthropicAgent` at a live data source (database query results, API response, log dump) and the plan agent at the research output to produce a structured outline; compute Tasks write the final report sections to disk or upload them to S3.
+- **Reproducible onboarding kits** — generate per-repository onboarding guides by feeding repo metadata (languages, dependencies, CI config) to the research agent and having compute Tasks emit `CONTRIBUTING.md`, architecture diagrams, and local-setup scripts — all skippable on re-run if the repo hasn't changed.

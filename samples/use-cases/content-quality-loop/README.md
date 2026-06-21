@@ -2,7 +2,7 @@
 
 > An AI writer revises a content draft until a separate AI judge scores it above a threshold — proving multi-iteration refinement with a durable loop.
 
-## In plain language
+## TL;DR
 
 You give this workflow a writing brief (topic, audience, required points) and a quality bar (say, a score of 85 out of 100). One AI agent writes a draft; a second AI agent reads it and scores it like a tough editor, giving a numeric grade and specific notes on what to fix. If the draft falls short, the writer sees the critique and tries again — automatically — until the score clears the bar or a maximum number of attempts is reached. Every draft and every critique get saved to a local database file so you can replay the whole revision history afterward. This is the pattern to reach for when a single AI pass isn't good enough and you want the system to self-correct until the output meets a defined standard.
 
@@ -106,3 +106,16 @@ On each render, `ctx.latest(outputs.critique, "judge")` reads the most recent cr
 **`scorers` prop expects `{ scorer: Scorer }`, not a bare `Scorer`.** `llmJudge(config)` returns a `Scorer`. Passing it directly as a map value produces a runtime error (`"undefined is not an object (evaluating 'scorer.id')"`) on every attempt, burning API calls before failing. Wrap it: `{ "llm-quality": { scorer: llmJudge(...) } }`.
 
 **Scorers are async observability, not control-flow.** The `llmJudge` scorer writes to `_smithers_scorers` after the task completes. For the final passing iteration the scorer row may not be written before the run exits — this is expected. Scorer scores and judge task scores are separate signals; do not use scorer output to gate the loop.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+This sample teaches the write→evaluate→revise loop pattern: how to use Smithers' `Loop` primitive with a dynamic exit condition, how to pass structured feedback between tasks so each iteration builds on the last, and how to separate observability signals (scorers) from control-flow gates. The reusable technique is any multi-pass refinement where a second agent acts as a gatekeeper with a numeric quality bar.
+
+**How to apply it to your own project**
+
+- **Marketing copy or documentation review:** Replace the demo brief with a real content spec from your CMS or ticket system. Set the threshold to match your editorial bar (e.g., 90 for customer-facing copy) and swap `claude-haiku-4-5` for a stronger model on the judge side only — keeping the writer on haiku controls cost.
+- **Code generation with lint/test feedback:** Replace the writer agent with a code-generation prompt and the judge with a structured linter or test-runner that returns a pass/fail score. The loop exits when all checks pass or `maxIterations` is exhausted, giving you an automated "fix until green" code agent.
+- **Structured data extraction with validation:** Use the loop to extract fields from messy input and validate completeness each pass. The judge prompt checks for missing required fields and returns a score based on fill rate; the writer re-reads the source and fills gaps until the schema is satisfied.
+- **Email or support-response drafting:** Point the brief at a real support ticket (fetched via API) and tune the judge to score on tone, accuracy, and policy compliance. The loop prevents sending a first draft that fails a compliance check, automatically requesting a revision before any human review step.

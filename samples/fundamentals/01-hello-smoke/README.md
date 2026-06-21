@@ -2,7 +2,7 @@
 
 > Run a minimal TSX workflow end-to-end and confirm Smithers persists every task result to SQLite.
 
-## In plain language
+## TL;DR
 
 You pass in a name (say, "World"), and the program greets it back ("Hello, World") — but the interesting part is what happens invisibly: every result gets automatically saved to a local database file on disk, so the run is durable and inspectable after the fact. Think of it like a simple script, except the output is written to a ledger you can query later instead of just printing and disappearing. This is the "does it even work?" sanity check you run first — proving the engine starts, runs a step, and stores the result, all with zero API keys or cloud accounts.
 
@@ -62,3 +62,16 @@ The runtime renders the JSX tree, executes each node, and persists results to th
 1. **Run `bun install` before `bunx --bun smithers-orchestrator up`** — skipping local install causes a React invalid-hook-call error because `bunx` may resolve a different React copy than the one Smithers expects.
 2. **The SQLite table name matches the `<Workflow name>` prop** — here `name="hello"` creates the `hello` table. Change the name and the table changes.
 3. **`--bun` flag is required** — `bunx smithers-orchestrator` without `--bun` runs under Node, which may not resolve Bun-specific module paths correctly; always use `bunx --bun`.
+
+## What you'll learn & how to apply it
+
+**What you'll learn**
+
+This example teaches the core Smithers primitive: wrapping work in a `<Task>` so that every result is automatically persisted to SQLite and the run is durable and inspectable. The reusable pattern is "define output shape with Zod, do work inside a Task, get persistence for free" — a foundation every other Smithers workflow builds on.
+
+**How to apply it to your own project**
+
+- **Replace the greeting with a real computation.** Swap `{ message: \`Hello, ${ctx.input.name}\` }` for any pure function — document parsing, JSON transformation, a local model call — and you immediately get a persisted, auditable record of every invocation with no extra plumbing.
+- **Use the SQLite table as a cheap job log.** In a CLI tool or batch script, treat the auto-created table as your job history: query it after a run to confirm which inputs succeeded, diff outputs across runs, or feed failed rows back as retry inputs.
+- **Chain multiple Tasks for a multi-step pipeline.** Once you're comfortable with a single Task, wrap two or more in a `<Sequence>` (e.g., fetch → parse → validate) and each step's output lands in its own named table, giving you a step-by-step audit trail without a database migration.
+- **Use this as the integration smoke test in CI.** A stripped-down "hello" workflow that asserts a known output is the fastest sanity check that a Smithers upgrade or environment change hasn't broken the runtime. Run it in CI before heavier workflow tests.

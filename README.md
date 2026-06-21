@@ -18,10 +18,11 @@ bunx --bun smithers-orchestrator up workflow.tsx --input '{"name":"world"}'
 sqlite3 smithers.db "SELECT * FROM hello;"   # -> <runId>|greet|0|Hello, world
 ```
 
-## What these examples do — in plain language
+## TL;DR — what each example does
 
-New to Smithers? Here's each sample in one plain sentence. (Every sample folder also has
-its own **"In plain language"** section up top.)
+New to Smithers? Here's each sample in one sentence. Every sample folder also has its own
+**TL;DR** up top and a **"What you'll learn & how to apply it"** section at the bottom — so you
+can see both what it does and how to reuse the pattern in your own projects.
 
 **Fundamentals — learn the engine**
 - **[01-hello-smoke](samples/fundamentals/01-hello-smoke)** — Pass in a name, get a greeting back, and confirm the result is automatically saved to a local file — the "does it even run?" check you do first.
