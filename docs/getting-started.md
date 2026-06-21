@@ -31,15 +31,14 @@ bun install                       # installs smithers-orchestrator@0.24.2 + zod
 bunx --bun smithers-orchestrator up workflow.tsx --input '{"name":"world"}'
 ```
 
-You should see the run finish with a `runId`, and the output is persisted to SQLite:
+The run finishes with a `runId`, and the output is persisted to SQLite:
 
 ```bash
 sqlite3 smithers.db "SELECT * FROM hello;"
 # <runId>|greet|0|Hello, world
 ```
 
-That's the whole loop: Smithers **rendered** the workflow, **executed** the task, and
-**persisted** the result to `./smithers.db`.
+Smithers **rendered** the workflow, **executed** the task, and **persisted** the result to `./smithers.db`.
 
 ## 4. Useful commands
 
@@ -64,7 +63,7 @@ Inspect the database directly any time: `sqlite3 smithers.db ".tables"` and
 
 - **`undefined is not an object (evaluating 'schema._zod.def')`** → you're on Zod v3. Smithers
   needs **`zod@^4`** (the samples pin it).
-- **`... did not return valid JSON for the declared output schema`** → almost always the wrong
+- **`... did not return valid JSON for the declared output schema`** → the wrong
   model. Use **`claude-haiku-4-5`**, not `claude-fable-5`.
 - **`RESUME_METADATA_MISMATCH`** → run `git init && git add -A && git commit -m init` in the
   sample folder *before* the first `up`, and don't edit the workflow file between a kill and a resume.

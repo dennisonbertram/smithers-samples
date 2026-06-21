@@ -5,7 +5,7 @@ React-style reconciler whose host elements are *tasks*, not DOM nodes. The loop 
 
 > **render → extract ready tasks → execute → persist to SQLite → re-render**
 
-Because every step is checkpointed to SQLite, a run is *durable*: kill it and resume without
+Every step is checkpointed to SQLite, so a run is *durable*: kill it and resume without
 redoing finished work, fork it at any past frame (time travel), pause it for human approval, and
 read its full history back out of the database.
 
@@ -53,7 +53,7 @@ const agent = new AnthropicAgent({ model: "claude-haiku-4-5", instructions: "…
 ```
 
 `AnthropicAgent` injects the output Zod schema and validates the response → the validated row is
-persisted. (On a validation miss it retries up to `retries` times.) Use
+persisted. On a validation miss it retries up to `retries` times. Use
 **`claude-haiku-4-5` / `claude-sonnet-4-6` / `claude-opus-4-8`**.
 
 ## Control-flow primitives (used in these samples)

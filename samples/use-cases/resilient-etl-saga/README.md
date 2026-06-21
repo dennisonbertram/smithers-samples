@@ -4,16 +4,16 @@
 
 ## TL;DR
 
-This example pulls recent code commits from a real GitHub repository, asks an AI model to rate how risky the changes look, then writes that summary into a local database file. The interesting part is what happens when something goes wrong midway: instead of leaving the database in a half-updated mess, the pipeline automatically erases its own partial work — like a chef who cleans the cutting board before leaving if the dish has to be abandoned. This solves a common headache in data engineering where a failed step silently corrupts your records, forcing manual cleanup later.
+This example pulls recent commits from a real GitHub repository, asks an AI model to rate how risky the changes look, then writes that summary into a local database. When something goes wrong midway, the pipeline automatically erases its own partial work — no manual cleanup, no half-ingested rows.
 
 **Teaches:** `Saga`, `Task` (compute + agent), `AnthropicAgent`, `Sequence`, `createSmithers` typed outputs, compensating transactions, durability
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY` (GitHub API is keyless)
 
-## What it demonstrates
+## What it does
 
-A classic data-pipeline hazard: the load step succeeds but the downstream publish step fails, leaving the warehouse with a partially-ingested batch. This sample shows how the `Saga` primitive makes the fix mechanical — declare an `action` and a `compensation` per step; on failure, compensations run in reverse order for every step that already succeeded. The data-integrity invariant (`COUNT(*) = 0` for the rolled-back row) is directly observable in SQLite, making the guarantee verifiable rather than theoretical.
+A `Saga` runs three stages: fetch commits from GitHub, classify them with an LLM, then load and publish the result. If the publish step fails, the saga runs compensating actions in reverse order — the load row gets deleted, the database stays clean. Set `failPublish: true` to trigger the rollback path, or `failPublish: false` to run the happy path where everything lands.
 
-The sample also wires a real `AnthropicAgent` into the pipeline for LLM-powered commit risk classification, so you can see an AI task as one stage in a larger durable workflow.
+The example also wires a real `AnthropicAgent` into the pipeline, so you can see an AI task as one stage in a larger durable workflow.
 
 ## Build & run
 
@@ -114,7 +114,7 @@ All output tables are declared upfront via `createSmithers({ ... })` with Zod sc
 
 **What you'll learn**
 
-The `Saga` primitive gives you declarative compensating transactions: each step declares an `action` and a `compensation`, and Smithers automatically runs compensations in reverse order for every step that already succeeded when a later step fails. This is the standard pattern for keeping distributed or multi-step data pipelines consistent without manual cleanup code — and it works even when the pipeline spans LLM enrichment, database writes, and external publish calls.
+The `Saga` primitive gives you declarative compensating transactions: each step declares an `action` and a `compensation`, and Smithers runs compensations in reverse order for every step that already succeeded when a later step fails. This is the standard pattern for keeping multi-step data pipelines consistent without manual cleanup code — and it works across LLM enrichment, database writes, and external publish calls.
 
 **How to apply it to your own project**
 

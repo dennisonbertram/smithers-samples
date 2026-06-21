@@ -1,17 +1,17 @@
 # Failure handling: retries, TryCatchFinally, event stream, scorers
 
-> Shows how Smithers records failure history, routes to catch/finally branches, and attaches automated evaluators to agent tasks — the operational seams needed for unattended workflows.
+> A workflow that breaks on purpose so you can see how Smithers handles failure — retries, catch/finally branches, and automated scorers that grade the output.
 
 ## TL;DR
 
-This example intentionally breaks a step, then watches the system recover: a task is set up to always fail, so you can see the retry fire, the "catch" handler run, and the "finally" cleanup run — just like try/catch/finally in ordinary code, but wired into a workflow that logs everything to a local database file. A second task asks an AI model a question and then automatically grades its own answer for correctness and speed, storing those scores alongside the result. If you're building any automated process that runs without a human watching — a nightly job, a data pipeline, an AI agent — this shows you how to make failures visible, recoverable, and measurable.
+Run this example and watch a task fail, retry, get caught, and get cleaned up — all in one workflow. A second task calls an AI model and automatically grades its own answer for schema correctness and latency. Every attempt, event, and score is saved to a local `smithers.db` file you can query with SQLite.
 
 **Teaches:** TryCatchFinally, retries, continueOnFail, AnthropicAgent, schemaAdherenceScorer, latencyScorer, event stream, `_smithers_attempts`, `_smithers_scorers`
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 
-## What it demonstrates
+## What it does
 
-A compute `Task` throws unconditionally with `retries={1}`, producing two rows in `_smithers_attempts` (initial attempt + one retry). Once retries are exhausted, the `TryCatchFinally` catch branch fires, followed by the finally branch — and the run finishes with status `finished` (failure absorbed). A second task attaches `schemaAdherenceScorer` and `latencyScorer` to an `AnthropicAgent` call, writing scorer results into `_smithers_scorers` and surfacing them via the `scores` CLI command. The 38-event stream (`NodeFailed`, `NodeRetrying`, `TokenUsageReported`, etc.) is queryable both from the CLI and from the raw NDJSON log on disk.
+A compute `Task` throws unconditionally with `retries={1}`, producing two rows in `_smithers_attempts` (initial attempt + one retry). Once retries are exhausted, the `TryCatchFinally` catch branch fires, then the finally branch — and the run finishes with status `finished` (failure absorbed). A second task attaches `schemaAdherenceScorer` and `latencyScorer` to an `AnthropicAgent` call, writing scorer results into `_smithers_scorers`. The full run produces 38 events (`NodeFailed`, `NodeRetrying`, `TokenUsageReported`, etc.) queryable from the CLI or the raw NDJSON log on disk.
 
 ## Build & run
 

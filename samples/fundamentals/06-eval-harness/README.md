@@ -4,14 +4,14 @@
 
 ## TL;DR
 
-You write a list of test cases — each one says "send this input to the AI workflow and expect the output to contain this" — and then run a single command that fires real model calls, checks every case, and saves a structured results file. The idea is the same as unit tests for regular code: run before your change to confirm things are broken (red), make your change, run again to confirm they pass (green). This is especially useful when your AI workflow's behavior might drift over time — you keep a repeatable record that the model actually said what you expected.
+Write a list of test cases — each one says "send this input to the AI workflow and expect the output to contain this" — then run one command that fires real model calls, checks every case, and saves a structured results file. Run before your change to confirm red, make your change, run again to confirm green.
 
 **Teaches:** AnthropicAgent, Task, Sequence, `smithers eval`, eval cases (`outputContains`), eval report shape, TDD red→green
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 
-## What it demonstrates
+## What it does
 
-Smithers ships a built-in `eval` command that runs a JSON case file against a workflow, fires real model calls, and writes a structured JSON report. This sample shows a complete red→green cycle: `red.test.ts` asserts the report does not exist yet, `smithers eval` executes the suite and writes the report, then `green.test.ts` asserts the report is present and structurally valid. The pattern is directly reusable for regression-guarding any Smithers workflow.
+Smithers ships a built-in `eval` command that runs a JSON case file against a workflow, fires real model calls, and writes a structured JSON report. `red.test.ts` asserts the report does not exist yet. `smithers eval` executes the suite and writes the report. `green.test.ts` asserts the report is present and structurally valid. The pattern is directly reusable for regression-guarding any Smithers workflow.
 
 ## Build & run
 
@@ -98,7 +98,7 @@ cat .smithers/evals/greeting-eval.json
 
 **What you'll learn**
 
-This sample teaches the Smithers eval harness pattern: how to define a JSON case file with input/expected pairs, run `smithers eval` to fire real model calls, and bracket the whole cycle with red/green test assertions. The transferable skill is regression-guarding any Smithers workflow — you get a repeatable, automatable record that the model behaves as expected, and you can add it to CI like any other test suite.
+This sample teaches the Smithers eval harness pattern: how to define a JSON case file with input/expected pairs, run `smithers eval` to fire real model calls, and bracket the whole cycle with red/green test assertions. You get a repeatable, automatable record that the model behaves as expected, and you can add it to CI like any other test suite.
 
 **How to apply it to your own project**
 

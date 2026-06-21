@@ -1,17 +1,17 @@
 # Hello Smithers — CLI smoke + SQLite persistence
 
-> Run a minimal TSX workflow end-to-end and confirm Smithers persists every task result to SQLite.
+> Run a minimal TSX workflow end-to-end and watch Smithers persist the result to SQLite.
 
 ## TL;DR
 
-You pass in a name (say, "World"), and the program greets it back ("Hello, World") — but the interesting part is what happens invisibly: every result gets automatically saved to a local database file on disk, so the run is durable and inspectable after the fact. Think of it like a simple script, except the output is written to a ledger you can query later instead of just printing and disappearing. This is the "does it even work?" sanity check you run first — proving the engine starts, runs a step, and stores the result, all with zero API keys or cloud accounts.
+Pass in a name, get a greeting back. Every result is saved to a local database file you can query later — no API key, no cloud account.
 
 **Teaches:** Workflow, Sequence, Task, outputs schema (Zod), SQLite persistence, `smithers up` CLI
 **Prerequisites:** Bun ≥ 1.3 · none (keyless)
 
-## What it demonstrates
+## What it does
 
-A single `<Task>` inside a `<Sequence>` accepts a string input, produces a typed output, and writes the result to a local `smithers.db`. This is the minimal proof that the Smithers runtime executes TSX workflows and that durability is on by default — no configuration required. It also surfaces the React dependency seam: the runtime uses React under the hood, so local `bun install` (not a bare `bunx`) is required to avoid invalid-hook-call errors.
+A single `<Task>` inside a `<Sequence>` accepts a string input, produces a typed output, and writes the result to a local `smithers.db`. Durability is on by default — no config needed. It also surfaces the React dependency seam: the runtime uses React under the hood, so local `bun install` (not a bare `bunx`) is required to avoid invalid-hook-call errors.
 
 ## Build & run
 
@@ -24,8 +24,6 @@ sqlite3 smithers.db "SELECT * FROM hello;"
 ```
 
 ## Expected output
-
-Example output — the CLI prints the workflow completion and the task output. The `hello` table in `smithers.db` holds the persisted row:
 
 ```
 # CLI (approximate)
@@ -61,11 +59,11 @@ The runtime renders the JSX tree, executes each node, and persists results to th
 
 **What you'll learn**
 
-This example teaches the core Smithers primitive: wrapping work in a `<Task>` so that every result is automatically persisted to SQLite and the run is durable and inspectable. The reusable pattern is "define output shape with Zod, do work inside a Task, get persistence for free" — a foundation every other Smithers workflow builds on.
+The core Smithers primitive: wrap work in a `<Task>` and every result is automatically persisted to SQLite. Define the output shape with Zod, do the work inside the Task, get persistence for free. Every other Smithers workflow builds on this.
 
 **How to apply it to your own project**
 
-- **Replace the greeting with a real computation.** Swap `{ message: \`Hello, ${ctx.input.name}\` }` for any pure function — document parsing, JSON transformation, a local model call — and you immediately get a persisted, auditable record of every invocation with no extra plumbing.
+- **Replace the greeting with a real computation.** Swap `{ message: \`Hello, ${ctx.input.name}\` }` for any pure function — document parsing, JSON transformation, a local model call — and you get a persisted, auditable record of every invocation with no extra plumbing.
 - **Use the SQLite table as a cheap job log.** In a CLI tool or batch script, treat the auto-created table as your job history: query it after a run to confirm which inputs succeeded, diff outputs across runs, or feed failed rows back as retry inputs.
-- **Chain multiple Tasks for a multi-step pipeline.** Once you're comfortable with a single Task, wrap two or more in a `<Sequence>` (e.g., fetch → parse → validate) and each step's output lands in its own named table, giving you a step-by-step audit trail without a database migration.
+- **Chain multiple Tasks for a multi-step pipeline.** Wrap two or more Tasks in a `<Sequence>` (e.g., fetch → parse → validate) and each step's output lands in its own named table, giving you a step-by-step audit trail without a database migration.
 - **Use this as the integration smoke test in CI.** A stripped-down "hello" workflow that asserts a known output is the fastest sanity check that a Smithers upgrade or environment change hasn't broken the runtime. Run it in CI before heavier workflow tests.

@@ -1,19 +1,19 @@
 # degree-builder — a Smithers workflow that durably scaffolds a structured knowledge-base project
 
-> Two AI agents research a topic and plan a learning ladder; five compute Tasks materialize a 42-file directory skeleton to disk — and a kill-and-resume proves that finished Tasks are never re-executed.
+> Two AI agents research a topic and plan a learning ladder; five compute Tasks write a 42-file directory skeleton to disk — and a kill-and-resume shows that finished Tasks are never re-executed.
 
 ## TL;DR
 
-You give this workflow a tool or technology name (say, "redis"), and it automatically produces a ready-to-use folder of 42 structured files — research notes, a skill progression plan, and stub documents for each learning level — by calling an AI twice and then writing the results to disk. Think of it like hiring a librarian who reads everything about a topic, drafts a curriculum, and files every document in labeled folders, all while you wait about 90 seconds.
+Give the workflow a tool or technology name (say, "redis") and it produces a ready-to-use folder of 42 structured files: research notes, a skill progression plan, and stub documents for each learning level. Two Anthropic agents do the thinking; compute Tasks write the results to disk. The whole run takes about 90 seconds.
 
-The more interesting trick is what happens if you pull the plug halfway through: when you restart with the same run ID, the workflow picks up exactly where it left off, skipping any steps that already finished. This solves a real headache in long-running AI pipelines — wasted time and money re-running expensive steps after a crash or timeout.
+Kill the process halfway through, restart with the same run ID, and Smithers skips every Task that already finished — including the expensive AI calls.
 
 **Teaches:** AnthropicAgent, Task (compute), Sequence, structured output (Zod schemas), durability / resume, agent-to-compute data flow, `ctx.outputMaybe`, red→green env-gate pattern
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 
-## What it demonstrates
+## What it does
 
-Two `AnthropicAgent` tasks produce structured JSON — a capability map and an L0–L5 POC ladder — and downstream compute Tasks consume those outputs to write a complete, hierarchical directory tree to disk. The data-flow seam (agent JSON becoming file content) is exercised end-to-end. Killing the process mid-run and resuming with the same `--run-id` shows that already-finished Tasks (including both expensive Anthropic calls) are skipped entirely on resume, while only the cancelled Task reruns.
+Two `AnthropicAgent` tasks produce structured JSON — a capability map and an L0–L5 POC ladder — and downstream compute Tasks consume those outputs to write a complete, hierarchical directory tree to disk. The data-flow seam (agent JSON becoming file content) runs end-to-end. Kill the process mid-run and resume with the same `--run-id`: already-finished Tasks (including both Anthropic calls) are skipped entirely; only the cancelled Task reruns.
 
 ## Build & run
 
@@ -137,7 +137,7 @@ The run stays in `status: running` for ~35s after the process dies. Attempting `
 
 **What you'll learn**
 
-This example teaches the *durable scaffolding generator* pattern: how to chain AI agents with downstream compute Tasks so that expensive LLM calls produce structured JSON that compute Tasks materialise into real files — and how Smithers' run-ID-based resumability means a crash or timeout never forces you to re-pay for already-completed steps. The key reusable techniques are agent-to-compute data flow via `ctx.outputMaybe`, Zod-validated structured output as a contract between stages, and the red/green env-gate for safely testing destructive side-effects.
+This example teaches the *durable scaffolding generator* pattern: how to chain AI agents with downstream compute Tasks so that expensive LLM calls produce structured JSON that compute Tasks write into real files — and how Smithers' run-ID-based resumability means a crash or timeout never forces you to re-run already-completed steps. The key reusable techniques are agent-to-compute data flow via `ctx.outputMaybe`, Zod-validated structured output as a contract between stages, and the red/green env-gate for safely testing destructive side-effects.
 
 **How to apply it to your own project**
 

@@ -1,17 +1,17 @@
 # Content pipeline with a quality-gate loop
 
-> An AI writer revises a content draft until a separate AI judge scores it above a threshold — proving multi-iteration refinement with a durable loop.
+> One AI agent writes a draft; a second AI agent scores it. The loop repeats until the score clears a threshold or a maximum number of attempts is reached.
 
 ## TL;DR
 
-You give this workflow a writing brief (topic, audience, required points) and a quality bar (say, a score of 85 out of 100). One AI agent writes a draft; a second AI agent reads it and scores it like a tough editor, giving a numeric grade and specific notes on what to fix. If the draft falls short, the writer sees the critique and tries again — automatically — until the score clears the bar or a maximum number of attempts is reached. Every draft and every critique get saved to a local database file so you can replay the whole revision history afterward. This is the pattern to reach for when a single AI pass isn't good enough and you want the system to self-correct until the output meets a defined standard.
+Give the workflow a writing brief and a quality bar (default: 85 out of 100). A writer agent produces a draft; a judge agent scores it and returns specific notes on what to fix. If the score is too low, the writer revises and the judge scores again — automatically — until the score passes or `maxIterations` is exhausted. Every draft and critique are saved to a local SQLite database so you can inspect the full revision history afterward.
 
 **Teaches:** `Loop` (until + maxIterations + onMaxReached), `Sequence`, `Task`, `AnthropicAgent`, `ctx.latest`, `llmJudge` scorer, SQLite output tables, scorer observability side-channel  
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 
-## What it demonstrates
+## What it does
 
-A writer agent produces a content draft against a brief; a judge agent scores it 0–100 and returns structured feedback. The `Loop` primitive repeats the write→judge cycle until the score clears a configurable threshold (default 85) or `maxIterations` is reached. Each iteration's draft and critique land in separate SQLite tables, giving you a complete revision history. An `llmJudge` scorer runs as an async observability side-channel, writing to `_smithers_scorers` independently of the control-flow gate — showing the distinction between evaluation signals and workflow control.
+A writer agent produces a content draft against a brief. A judge agent scores it 0–100 and returns structured feedback. The `Loop` primitive repeats the write→judge cycle until the score clears a configurable threshold (default 85) or `maxIterations` is reached. Each iteration's draft and critique land in separate SQLite tables, giving you a complete revision history. An `llmJudge` scorer runs as an async observability side-channel, writing to `_smithers_scorers` independently of the control-flow gate — separate from the score the loop uses to decide whether to continue.
 
 ## Build & run
 

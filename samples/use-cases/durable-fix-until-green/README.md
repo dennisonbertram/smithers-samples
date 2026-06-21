@@ -4,14 +4,14 @@
 
 ## TL;DR
 
-You hand it a file with a bug in it and a test suite that is currently failing. The AI reads the broken code, makes a fix, runs the tests, and if they still fail it tries again — up to five times — until every test passes. The real magic is the crash-recovery: if the program is killed mid-run, it can pick up exactly where it stopped without redoing any work it already finished. This solves the very common frustration of a long automated task being interrupted and having to start over from scratch.
+Hand it a file with a bug and a failing test suite. The AI reads the broken code, applies a fix, runs the tests, and loops — up to five times — until every test passes. If the process is killed mid-run, resume it and Smithers picks up exactly where it stopped. No work is repeated.
 
 **Teaches:** AnthropicAgent, Loop, Sequence, Task (compute), `createSmithers` output schemas, durability / resume, `ctx.latest`
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 
-## What it demonstrates
+## What it does
 
-The workflow starts with a deliberately broken `src/slugify.ts` (one character bug: `+` instead of `-`). An `AnthropicAgent` (claude-haiku-4-5) reads the source and tests, applies a fix, then a compute task runs `bun test` and parses the result. The `<Loop>` repeats this pair until `testResult.passed === true` or five iterations are exhausted. The sample also shows Smithers' durability guarantee: kill the process mid-run, resume with `--resume true`, and Smithers picks up exactly where it left off — no work is re-done.
+The workflow starts with a deliberately broken `src/slugify.ts` (one character bug: `+` instead of `-`). An `AnthropicAgent` (claude-haiku-4-5) reads the source and tests, applies a fix, then a compute task runs `bun test` and parses the result. A `<Loop>` repeats this pair until `testResult.passed === true` or five iterations are exhausted. Kill the process mid-run, resume with `--resume true`, and Smithers picks up from the last completed step — no steps are re-run.
 
 ## Build & run
 

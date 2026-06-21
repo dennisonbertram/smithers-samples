@@ -1,17 +1,17 @@
 # Agent Task with Zod-validated structured output
 
-> Drive a live Claude call, validate its JSON response against a Zod schema, and persist the typed result to SQLite — all in a single `<Task>`.
+> Feed a news article to Claude, get back a validated structured object, and save the typed result to SQLite — all in a single `<Task>`.
 
 ## TL;DR
 
-You feed in a raw news article, and the workflow asks Claude to read it and fill out a structured "form" — category, sentiment, confidence score, key topics, and a one-sentence summary. The framework checks that Claude's answer actually matches that form (right fields, right types) before saving the completed row to a local database file. This solves a very common AI problem: getting a language model to reliably return machine-readable data instead of free-form prose you'd have to parse yourself.
+You pass in raw article text. The workflow asks Claude to return a structured "form" — category, sentiment, confidence score, key topics, and a one-sentence summary. The framework validates that response against a Zod schema before saving the row to a local database file. You get machine-readable data out of a language model without writing any parsing glue.
 
 **Teaches:** `AnthropicAgent`, `Task` (structured output), `Sequence`, `createSmithers` output schemas, durability (SQLite persistence)
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 
-## What it demonstrates
+## What it does
 
-A news article classifier receives raw article text via `ctx.input.text` and produces five typed fields — `category`, `sentiment`, `confidence`, `key_topics`, and `summary` — validated against a Zod schema before the workflow finishes. The Smithers runtime injects the schema into the prompt automatically, validates the agent's JSON response, and persists the result to a SQLite table named after the schema key (`classification`). If validation fails, the task retries up to the configured limit before the run fails — no manual error handling required.
+A news article classifier receives raw article text via `ctx.input.text` and produces five typed fields — `category`, `sentiment`, `confidence`, `key_topics`, and `summary` — validated against a Zod schema before the workflow finishes. The Smithers runtime injects the schema into the prompt, validates the agent's JSON response, and persists the result to a SQLite table named after the schema key (`classification`). If validation fails, the task retries up to the configured limit before the run fails.
 
 ## Build & run
 
@@ -64,7 +64,7 @@ The `_smithers_runs` table shows `status=finished` and `_smithers_attempts` show
 
 ## How it works
 
-`createSmithers({ classification: z.object({...}) })` in `workflow.tsx` does three things at once: registers a SQLite table named `classification`, derives the TypeScript type for that table, and provides the `outputs.classification` reference used on the `<Task output={...}>` prop. When the workflow runs, the single `<Task>` inside the `<Sequence>` calls `classifyAgent` (an `AnthropicAgent` wrapping `claude-haiku-4-5`), passes the article text as its prompt body, and lets the runtime handle schema injection, validation, and persistence. The `retries={1}` prop means a validation failure gets one retry before the run errors — fast feedback during development.
+`createSmithers({ classification: z.object({...}) })` in `workflow.tsx` does three things at once: registers a SQLite table named `classification`, derives the TypeScript type for that table, and provides the `outputs.classification` reference used on the `<Task output={...}>` prop. When the workflow runs, the single `<Task>` inside the `<Sequence>` calls `classifyAgent` (an `AnthropicAgent` wrapping `claude-haiku-4-5`), passes the article text as its prompt body, and lets the runtime handle schema injection, validation, and persistence. The `retries={1}` prop means a validation failure gets one retry before the run errors.
 
 ## Key gotchas
 
@@ -78,7 +78,7 @@ The `_smithers_runs` table shows `status=finished` and `_smithers_attempts` show
 
 **What you'll learn**
 
-The core transferable skill here is using `createSmithers` output schemas to turn a free-form LLM response into a typed, validated, persisted record — without writing any parsing or validation glue yourself. You declare a Zod schema once, and the runtime handles prompt injection, JSON validation, retry on bad output, and SQLite persistence. This pattern applies any time you need a language model to produce machine-readable data reliably.
+Declare a Zod schema once with `createSmithers` output schemas, and the runtime handles prompt injection, JSON validation, retry on bad output, and SQLite persistence. No parsing or validation glue required. This pattern applies any time you need a language model to produce machine-readable data reliably.
 
 **How to apply it to your own project**
 

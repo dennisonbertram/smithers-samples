@@ -4,16 +4,14 @@
 
 ## TL;DR
 
-You feed this workflow a code diff and it dispatches three AI reviewers at the same time — one looking for bugs, one checking for security problems, one reviewing style — then a fourth AI reads all three reports and writes a single consolidated verdict. The whole run then pauses and waits for a real human to say "post it" or "hold it" before anything is published, with a record of who decided and when saved to a local database file regardless of outcome. This solves the problem of AI-generated code reviews going out unchecked: you get the speed of parallel AI analysis with a mandatory human sign-off before the feedback ever reaches a developer.
+Feed this workflow a code diff and it dispatches three AI reviewers at the same time — one for bugs, one for security, one for style — then a fourth AI reads all three reports and writes a single consolidated verdict. The run pauses and waits for a human to approve or deny before anything is published. Either way, a record of who decided and when is saved to a local database file.
 
 **Teaches:** `AnthropicAgent`, `Parallel`, `Sequence`, `Task`, `Approval` (HITL), conditional rendering, `ctx.outputMaybe`, durability / resume-without-replay
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 
-## What it demonstrates
+## What it does
 
-A realistic AI code-review pipeline stages four concerns in sequence: three `AnthropicAgent` tasks run in parallel (correctness, security, style), a fourth judge agent synthesizes their structured outputs into a single ranked verdict, and then an `Approval` gate pauses the run until a human explicitly approves or denies. Only after approval does the post-review task execute — and on resume, Smithers skips every already-finished task, so the four LLM calls are never replayed.
-
-This is the shape of a production AI code-review bot: parallel specialist agents, a synthesis layer, a durable human checkpoint, and an auditable post-action record regardless of outcome.
+Three `AnthropicAgent` tasks run in parallel (correctness, security, style). A fourth judge agent reads their structured outputs and produces a single ranked verdict. An `Approval` gate then pauses the run until a human approves or denies. Only after approval does the post-review task execute. On resume, Smithers skips every already-finished task, so the four LLM calls are never replayed.
 
 ## Build & run
 
@@ -116,7 +114,7 @@ The workflow in `workflow.tsx` has four stages wired as a `<Sequence>`:
 
 **What you'll learn**
 
-This sample teaches the parallel-fan-out + synthesis + HITL gate pattern: how to run independent AI specialists concurrently, merge their structured outputs through a judge agent, and insert a mandatory human decision point before any side effect executes — all with Smithers' built-in durability so the LLM work is never replayed on resume.
+This sample teaches the parallel-fan-out + synthesis + HITL gate pattern: how to run independent AI specialists concurrently, merge their structured outputs through a judge agent, and insert a mandatory human decision point before any side effect executes — with Smithers' built-in durability so the LLM work is never replayed on resume.
 
 **How to apply it to your own project**
 

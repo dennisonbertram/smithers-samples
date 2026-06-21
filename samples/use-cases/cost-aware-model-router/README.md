@@ -4,14 +4,14 @@
 
 ## TL;DR
 
-You hand this workflow a list of questions or tasks. It first tries to answer each one using a small, cheap AI model — the equivalent of asking an intern. A more capable model then double-checks the answer; if it's good enough, you're done and paid almost nothing. Only when the cheap answer falls short does the workflow automatically retry with a more expensive model, and it tracks exactly how much each escalation cost you. This solves a real cost problem: today most AI applications blindly route every request to the best (priciest) model, even when a much cheaper one would have done the job just fine.
+You give this workflow a list of questions or tasks. It tries each one with a cheap model first. A more capable model checks the answer; if it passes, you're done. Only when the cheap answer falls short does the workflow retry with a more expensive model, and it tracks exactly what each escalation cost.
 
 **Teaches:** AnthropicAgent, Task (agent + compute + static), Branch (nested 3-way), Parallel, Sequence, ctx.outputMaybe, ctx.runId, llmJudge scorer, bun:sqlite event-stream query
 **Prerequisites:** Bun ≥ 1.3 · `ANTHROPIC_API_KEY`
 
-## What it demonstrates
+## What it does
 
-Every incoming task is attempted by `claude-haiku-4-5` first, regardless of how the classifier ranked it. A `claude-sonnet-4-6` verifier then checks the answer against a configurable quality bar (default `0.96`). Tasks that fall below the bar escalate to either `claude-sonnet-4-6` (moderate ceiling) or `claude-opus-4-8` (hard ceiling), with each escalation written as a durable record. After all items finish, a compute Task reads the live `_smithers_events` token-usage stream and produces a per-tier cost ledger in dollars — showing exactly what cheap-first routing saved you.
+Every incoming task is attempted by `claude-haiku-4-5` first, regardless of how the classifier ranked it. A `claude-sonnet-4-6` verifier checks the answer against a configurable quality bar (default `0.96`). Tasks that fall below the bar escalate to either `claude-sonnet-4-6` (moderate ceiling) or `claude-opus-4-8` (hard ceiling), with each escalation written as a durable record. After all items finish, a compute Task reads the live `_smithers_events` token-usage stream and produces a per-tier cost ledger in dollars.
 
 ## Build & run
 
