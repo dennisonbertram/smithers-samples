@@ -62,7 +62,7 @@ finally-cleanup   1        finished  finally always runs
 scored-summary    1        finished  agent task with scorers
 ```
 
-Scorer results (verified run `f4c65ae8`):
+Scorer results (example):
 
 ```json
 {
@@ -74,15 +74,6 @@ Scorer results (verified run `f4c65ae8`):
 ```
 
 The event stream totals 38 `SmithersEvent` records for this run.
-
-## What it proves
-
-Verified run `f4c65ae8-c31e-44e3-ac17-b6630f001ce7` (status: `finished`):
-
-- `retries={1}` produces exactly 2 `_smithers_attempts` rows for `failing-compute`, both `state=failed`.
-- `TryCatchFinally` catch and finally branches both execute after retries exhaust; run-level status is `finished` — the failure is absorbed.
-- `schemaAdherenceScorer` and `latencyScorer` each score `1.00` and appear in `_smithers_scorers` (2 rows).
-- Token usage (`inputTokens: 282, outputTokens: 20`) is reported in the event stream via `TokenUsageReported` and accessible per-node via the `node` CLI command.
 
 ## How it works
 
@@ -101,7 +92,6 @@ The `createSmithers` call declares output schemas (`flaky_result`, `recovered`, 
 2. **`attempt` is 1-based in `_smithers_attempts`** — `retries={1}` means 1 retry on top of the initial attempt, producing rows with `attempt=1` and `attempt=2`. There is no `attempt=0`.
 
 3. **`ScorerStarted`/`ScorerFinished` events do NOT appear in the NDJSON stream log** — scorer results are only accessible via `scores <runId>`, `node <nodeId> --run-id <runId> --format json`, or the `_smithers_scorers` SQLite table directly.
-
 
 ## What you'll learn & how to apply it
 

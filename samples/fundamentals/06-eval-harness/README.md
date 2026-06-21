@@ -44,7 +44,7 @@ cat .smithers/evals/greeting-eval.json
 ```json
 {
   "suiteId": "greeting-eval",
-  "runLabel": "20260617142037-bd99758c",
+  "runLabel": "20260101120000-a1b2c3d4",
   "durationMs": 2072,
   "summary": { "total": 2, "passed": 2, "failed": 0, "byStatus": { "finished": 2 } },
   "results": [
@@ -75,10 +75,6 @@ cat .smithers/evals/greeting-eval.json
 ```
 
 `bun test green.test.ts` follows with: `5 pass, 0 fail`.
-
-## What it proves
-
-Verified run `20260617142037-bd99758c`: `smithers eval` invoked `claude-haiku-4-5` via the real Anthropic API, executed 2 cases (English and Spanish greetings), wrote a valid report to `.smithers/evals/greeting-eval.json`, and returned `summary.passed: 2, summary.failed: 0`. Both `status` and `outputContains` assertions passed for every case.
 
 ## How it works
 

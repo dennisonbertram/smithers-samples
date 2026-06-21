@@ -6,9 +6,8 @@ components (`<Task>`, `<Parallel>`, `<Approval>`, `<Saga>`, …); Smithers rende
 the ready tasks, and **checkpoints every step to SQLite** so a run can be killed and resumed,
 time-traveled, paused for human approval, and observed — without a server or a cloud account.
 
-Every sample here was **built and run live** (real model calls / real APIs, no mocks) and each
-folder's README cites the real `runId` it was verified with. Start with the fundamentals, then
-explore the use-cases.
+Every sample is a complete, runnable workflow — real model calls and real APIs, no pseudocode or
+mocks. Start with the fundamentals, then explore the use-cases.
 
 ```bash
 git clone https://github.com/dennisonbertram/smithers-samples
@@ -84,16 +83,15 @@ can see both what it does and how to reuse the pattern in your own projects.
 
 ```
 <sample>/
-  README.md        # what it teaches, how to run, expected output, what it proves
+  README.md        # what it teaches, how to run, expected output, how to apply it
   workflow.tsx     # the workflow (some samples add helpers/tests/fixtures)
   package.json     # pins smithers-orchestrator@0.24.2 + zod@^4
   tsconfig.json    # jsxImportSource: "smithers-orchestrator"
 ```
 
-## Conventions & doctrine
+## Conventions
 
-- **Live, no mocks.** Every sample hits a real service (a real model call, a real public API).
-  READMEs cite the real `runId` they were verified with.
+- **Real, runnable code.** Every sample makes real model/API calls — no mocks or stubs.
 - **Pinned.** `smithers-orchestrator@0.24.2`, `zod@^4`, Bun ≥ 1.3.
 - New to the framework? Read [`docs/concepts.md`](docs/concepts.md) for the mental model and
   [`docs/gotchas.md`](docs/gotchas.md) for the pitfalls that cost the most time.
@@ -102,7 +100,7 @@ can see both what it does and how to reuse the pattern in your own projects.
 
 - 📖 [`docs/getting-started.md`](docs/getting-started.md) — install Bun, set your key, run your first sample
 - 🧠 [`docs/concepts.md`](docs/concepts.md) — the Smithers mental model + every primitive used here
-- ⚠️ [`docs/gotchas.md`](docs/gotchas.md) — 0.24.x pitfalls, each verified live
+- ⚠️ [`docs/gotchas.md`](docs/gotchas.md) — the 0.24.x pitfalls that cost the most time
 - 🔗 [Smithers](https://smithers.sh) · [`smithers-orchestrator` on npm](https://www.npmjs.com/package/smithers-orchestrator)
 
 ## License

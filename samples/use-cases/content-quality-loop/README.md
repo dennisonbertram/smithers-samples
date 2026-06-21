@@ -54,11 +54,11 @@ bunx --bun smithers-orchestrator events <runId> --format jsonl | grep -i "NodeFi
 
 ## Expected output
 
-The workflow logs each iteration as it runs, then exits when `passed=1`. For the default brief at threshold 85, expect 2–4 iterations. Verified output for run `e835d4c6`:
+The workflow logs each iteration as it runs, then exits when `passed=1`. For the default brief at threshold 85, expect 2–4 iterations. Example output:
 
 ```
 # critique table — ascending score trajectory
-sqlite3 smithers.db "SELECT iteration, score, passed FROM critique WHERE run_id='e835d4c6-c12d-4614-92b3-5b97dd0448fc' ORDER BY iteration;"
+sqlite3 smithers.db "SELECT iteration, score, passed FROM critique WHERE run_id='<runId>' ORDER BY iteration;"
 0|72|0
 1|82|0
 2|88|1
@@ -66,17 +66,13 @@ sqlite3 smithers.db "SELECT iteration, score, passed FROM critique WHERE run_id=
 
 ```
 # draft table — change notes show genuine revision
-sqlite3 smithers.db "SELECT iteration, rev_num, word_count, change_note FROM draft WHERE run_id='e835d4c6-c12d-4614-92b3-5b97dd0448fc' ORDER BY iteration;"
+sqlite3 smithers.db "SELECT iteration, rev_num, word_count, change_note FROM draft WHERE run_id='<runId>' ORDER BY iteration;"
 0|1|212|initial draft
 1|2|194|Removed redundant headline, added specific ROI case study (bakery, $12,000 savings)...
 2|3|197|Added third objection, clarified case study, linked satisfaction to revenue impact.
 ```
 
 Total run time: ~31 seconds. Total tokens: ~9,005 (all `claude-haiku-4-5`).
-
-## What it proves
-
-Verified run `e835d4c6-c12d-4614-92b3-5b97dd0448fc` (smithers-orchestrator@0.24.2, Bun 1.3.14) shows three distinct loop iterations (0, 1, 2) with scores 72 → 82 → 88. The writer genuinely incorporated editor feedback each pass — iteration 1 added a missing ROI case study that the judge had flagged, lifting the score from 72 to 82; iteration 2 addressed remaining objection coverage, reaching 88 and exiting. This is the multi-pass refinement path, not a one-shot exit.
 
 ## How it works
 

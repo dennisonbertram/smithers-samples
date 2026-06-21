@@ -70,30 +70,22 @@ sqlite3 smithers.db "SELECT run_id, node_id, status, approved FROM gated_result;
 <runId>|gated-task|approved-and-ran|1
 ```
 
-**Parallel timing** (verified run `3cfa3c18`): `task_a` and `task_b` share the same `ts` value; `task_c` has a later timestamp — confirming the concurrency cap of 2:
+**Parallel timing:** `task_a` and `task_b` share the same `ts` value; `task_c` has a later timestamp — confirming the concurrency cap of 2:
 ```
-3cfa3c18...|task-a|parallel-A|2026-06-17T14:15:29.048Z
-3cfa3c18...|task-b|parallel-B|2026-06-17T14:15:29.048Z
-3cfa3c18...|task-c|parallel-C|2026-06-17T14:15:29.214Z
+<runId>|task-a|parallel-A|2026-06-17T14:15:29.048Z
+<runId>|task-b|parallel-B|2026-06-17T14:15:29.048Z
+<runId>|task-c|parallel-C|2026-06-17T14:15:29.214Z
 ```
 
 **Approvals table** after grant:
 ```
-3cfa3c18...|approve-gate|approved|tester|
+<runId>|approve-gate|approved|tester|
 ```
 
 **Memory fact** (persists across both runs):
 ```
 workflow:l3-control-hitl-memory|poc-fact|{"value":"L3 memory proof: ...","writtenAt":"..."}|1781705772232|1781705772232
 ```
-
-## What it proves
-
-Verified on runs `3cfa3c18-3d48-4a47-bbac-3528ac92896d` (primary) and `9ea263ec-8fcc-4bbe-aa69-07ad9e16cca0` (memory persistence):
-
-- **Parallel concurrency cap is strict** — event stream shows `NodeStarted` for `task-a` and `task-b` at `+00:00.163`/`+00:00.164` (concurrent); `task-c` at `+00:00.181` (after both finished).
-- **Approval pause/resume is clean** — `ApprovalRequested` at `+00:00.192`, `ApprovalGranted` at `+00:13.397`, `gated-task` started at `+00:17.811` — only after human action.
-- **Memory outlives runs** — `created_at_ms=1781705772232` is identical in the `_smithers_memory_facts` row after both runs completed, confirming the store is persistent, not reset per run.
 
 ## How it works
 

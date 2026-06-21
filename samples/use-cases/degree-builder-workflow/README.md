@@ -108,22 +108,6 @@ sqlite3 smithers.db "SELECT degree_root, total_files, total_dirs FROM manifest;"
 scratch-out/redis/degrees/01-cache-and-pubsub|42|14
 ```
 
-## What it proves
-
-GREEN run `31820dde` (status: `finished`) produced a complete 42-file skeleton at `scratch-out/redis/degrees/01-cache-and-pubsub/` with real `claude-sonnet-4-6` structured output (both Anthropic calls took ~29s each, confirmed by timestamps).
-
-Durability run `cf728133` was killed after `write-metadata` completed and resumed from the same `run-id`. The attempt table shows:
-
-```
-research|1|finished
-plan|1|finished
-write-metadata|1|finished
-write-research|1|cancelled   ← the killed attempt
-write-research|2|finished    ← the resumed attempt
-```
-
-`research`, `plan`, and `write-metadata` each have exactly one attempt — they were not re-executed. The run finished with the same `run-id` and produced an identical 42-file tree.
-
 ## How it works
 
 `workflow.tsx` composes a single `<Sequence>` of seven Tasks inside a `<Workflow>`:

@@ -71,4 +71,4 @@ Inspect the database directly any time: `sqlite3 smithers.db ".tables"` and
 - **Resume rejected right after a kill** → the previous run's heartbeat is still "fresh." Wait
   ~35s, then resume. (And kill Bun with `kill -9` — it ignores `SIGTERM`.)
 
-More pitfalls, each verified live: [`gotchas.md`](gotchas.md).
+More pitfalls: [`gotchas.md`](gotchas.md).

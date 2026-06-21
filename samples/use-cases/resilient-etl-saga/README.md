@@ -58,11 +58,11 @@ bunx --bun smithers-orchestrator events <RUN_ID>
 
 The run prints a JSON result and exits with status `finished` even when compensation fires — `onFailure="compensate"` is designed to resolve the saga gracefully.
 
-**Verified failure-path run** (`0934dbe1-a2fd-4351-9ad8-0c172eec21ae`):
+Example output (failure path — `failPublish: true`):
 
 ```
 # _smithers_runs
-0934dbe1-a2fd-4351-9ad8-0c172eec21ae|resilient-etl-saga|finished
+<run-id>|resilient-etl-saga|finished
 
 # _smithers_attempts
 enrich-commits|1|finished
@@ -73,7 +73,7 @@ publish-act|1|failed
 
 # loaded_commits — warehouse is clean after rollback
 SELECT COUNT(*) ... WHERE node_id='load-act'  →  0
-SELECT ... WHERE run_id='0934dbe1...'  →  load-comp|0|0934dbe1...|1
+SELECT ... WHERE run_id='<run-id>'  →  load-comp|0|<run-id>|1
 # (rolled_back=1, loaded_count=0)
 
 # LLM enrichment (real commits from colinhacks/zod at run time)
@@ -86,15 +86,7 @@ notable_shas: 6f5e99fd,3fc9b25f
 enrich-commits  in=775  out=108
 ```
 
-**Verified happy-path run** (`d15d60ca-12a0-4542-b4d3-354ba4df9d5c`): `loaded_count=5`, `rolled_back=0`, `published=1` — row preserved, no compensation.
-
-## What it proves
-
-Verified live against smithers-orchestrator@0.24.2 on 2026-06-21:
-
-- **Run `0934dbe1`** — `onFailure="compensate"` fires `load-comp`, which opens a side-channel SQLite connection and DELETEs the `load-act` row. `COUNT(*) = 0` confirms the warehouse is clean. The run finishes with `status: finished`.
-- **Run `356995df`** — a no-op compensation (no DELETE) leaves 2 rows in `loaded_commits`, both with `rolled_back=0`, demonstrating the dirty-state the saga is designed to prevent.
-- The `publish-comp` compensation is never invoked — Smithers only compensates steps that already succeeded, not the step that failed.
+Happy path (`failPublish: false`): `loaded_count=5`, `rolled_back=0`, `published=1` — row preserved, no compensation.
 
 ## How it works
 

@@ -48,23 +48,19 @@ bunx --bun smithers-orchestrator down --force
 
 ## Expected output
 
-Both runs complete on the first attempt in 1–4 seconds. The `classification` table row for the technology article (verified run `56cda949`):
+Both runs complete on the first attempt in 1–4 seconds. Example output for the technology article:
 
 ```
-56cda949-...|classify-article|0|technology|positive|0.92|["OpenAI","GPT-5","artificial intelligence"]|OpenAI released GPT-5, a breakthrough AI model with unprecedented reasoning capabilities that could transform the technology industry.
+<run-id>-...|classify-article|0|technology|positive|0.92|["OpenAI","GPT-5","artificial intelligence"]|OpenAI released GPT-5, a breakthrough AI model with unprecedented reasoning capabilities that could transform the technology industry.
 ```
 
-The sports article run (verified run `5be7eef2`) produces:
+The sports article run produces:
 
 ```
-5be7eef2-...|classify-article|0|sports|negative|0.95|["soccer","championship final","team loss"]|The local soccer team suffered a devastating 0-3 defeat in the championship final, disappointing their traveling supporters.
+<run-id>-...|classify-article|0|sports|negative|0.95|["soccer","championship final","team loss"]|The local soccer team suffered a devastating 0-3 defeat in the championship final, disappointing their traveling supporters.
 ```
 
 The `_smithers_runs` table shows `status=finished` and `_smithers_attempts` shows `attempt=1` for both — no retries needed.
-
-## What it proves
-
-Two live runs on Smithers 0.24.2 (`56cda949`, `5be7eef2`) confirmed end-to-end: a real Anthropic API call (`claude-haiku-4-5`) returns JSON, the runtime validates it against the declared Zod schema, and the typed row lands in SQLite. Both runs succeeded on the first attempt. The `agentEngine: "anthropic-sdk"` field in the attempt record confirms native Anthropic structured output was used, not a workaround.
 
 ## How it works
 
@@ -74,7 +70,7 @@ Two live runs on Smithers 0.24.2 (`56cda949`, `5be7eef2`) confirmed end-to-end: 
 
 1. **Use `z.string()` for float fields, not `z.number()`.** Smithers maps `z.number()` to a SQLite `INTEGER` column, so a confidence value of `0.9` is stored as `1`. The schema in this sample uses `z.string()` for `confidence` to preserve decimal precision (e.g. `"0.92"`).
 
-2. **Model id errors surface as JSON validation failures, not `model-not-found`.** If the model name is wrong (e.g. `claude-fable-5`), Smithers receives no output from the API and reports: `Task "classify-article" expected structured JSON output, but the agent/model did not return valid JSON`. The root cause is `AI_NoOutputGeneratedError`. Use `claude-haiku-4-5` (live-verified).
+2. **Model id errors surface as JSON validation failures, not `model-not-found`.** If the model name is wrong (e.g. `claude-fable-5`), Smithers receives no output from the API and reports: `Task "classify-article" expected structured JSON output, but the agent/model did not return valid JSON`. The root cause is `AI_NoOutputGeneratedError`. Use `claude-haiku-4-5`.
 
 3. **Always `bun install` first and use `bunx --bun smithers-orchestrator`.** Running via a global `bunx` without a local install can pull in conflicting package versions and produce a React invalid-hook-call error. The `--bun` flag ensures Bun's resolver uses the locally installed version.
 

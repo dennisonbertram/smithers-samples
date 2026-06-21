@@ -67,14 +67,14 @@ sqlite3 smithers.db "SELECT posted, headline FROM posted_review WHERE run_id='<r
 exit=3
 ```
 
-**Resume after approve (verified output, runId `ba929670`):**
+**Resume after approve:**
 ```
 [00:00:00] -> review-gate (attempt 1, iteration 0)
 [00:00:00] ✔ review-gate (attempt 1)
 [00:00:00] -> post-review (attempt 1, iteration 0)
 [00:00:00] ✔ post-review (attempt 1)
 [00:00:00] ✔ Run finished
-{"runId":"ba929670-ec0d-40d9-9b21-d35294b2febe","status":"finished"}
+{"runId":"<runId>","status":"finished"}
 exit=0
 ```
 
@@ -84,20 +84,11 @@ posted=1 | verdict=request-changes | approved_by=lead-reviewer
 headline=Review POSTED: request-changes (15 findings)
 ```
 
-**`posted_review` row (deny path, runId `90da1cbb`):**
+**`posted_review` row (deny path):**
 ```
 posted=0 | verdict=request-changes | approved_by=lead-reviewer
 headline=Review WITHHELD: request-changes (10 findings)
 ```
-
-## What it proves
-
-Verified live on smithers-orchestrator@0.24.2:
-
-- **Approve path** (runId `ba929670-ec0d-40d9-9b21-d35294b2febe`): all four agent tasks finished in one attempt each; the run paused at the gate (exit 3); after `approve`, resume completed in under a second with only `review-gate` and `post-review` executing; `posted_review` recorded `posted=1` with the judge's verdict and the human approver's identity.
-- **Deny path** (runId `90da1cbb-7b43-4226-bb2a-de7939820de4`): same pause/resume pattern; `posted_review` recorded `posted=0` and headline "Review WITHHELD"; the workflow finished cleanly (exit 0) — every outcome is audited.
-- **Durability**: `_smithers_attempts` shows exactly `attempt=1, state=finished` for all six nodes across both runs. No task was replayed on resume.
-- **Specialist focus**: the correctness agent caught the planted wrong-return bug and the missing negative-pct guard; the security agent caught SQL injection and credential logging; the style agent caught `var`, missing semicolons, and line-length violations — each staying within its declared domain.
 
 ## How it works
 

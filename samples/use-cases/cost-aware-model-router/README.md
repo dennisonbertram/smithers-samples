@@ -54,7 +54,7 @@ bunx --bun smithers-orchestrator scores $RUN_ID --format json
 
 The run completes in roughly 15 seconds. With `qualityBar=0.96`, the `summary` item is the reliable escalation trigger: the haiku answer omits a key fact (Brazil's 60% share) and scores `0.95` — just below the bar — causing it to escalate to sonnet.
 
-Verified output from runId `52e8e9dc-6d5d-4a26-b694-91ea303fed04`:
+Example output:
 
 **Classification**
 | item | tier | routed_model |
@@ -77,14 +77,6 @@ total_input_tokens | total_output_tokens | total_cost_usd | escalations
 ```
 
 Per-tier breakdown: haiku — 6 calls, $0.0044; sonnet — 5 calls, $0.0147; opus — 0 calls (hard item passed at haiku).
-
-## What it proves
-
-RunId `52e8e9dc-6d5d-4a26-b694-91ea303fed04` (live Anthropic API, real token counts) confirms:
-
-1. Cheap-first routing works: two of three items were fully answered by haiku with no escalation.
-2. Quality-gated escalation fires correctly: `summary` escalated haiku → sonnet based on a `score=0.95` falling below `qualityBar=0.96`. The escalation row is present in the `escalation` table; the not-taken Branch sides (`record-escalation-easy-arith`, `record-escalation-hard-reasoning`) remain in `pending` state — proving Branch executes only the selected side.
-3. Cost attribution from the event stream works end-to-end: the compute Task reads `TokenUsageReported` events from `_smithers_events`, attributes spend by nodeId prefix, and writes dollar totals to `cost_ledger`.
 
 ## How it works
 

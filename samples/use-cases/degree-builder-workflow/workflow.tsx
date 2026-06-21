@@ -211,7 +211,7 @@ ${r.primaryQuestion}
 Scaffolded; POCs pending.
 
 ## Why This Topic Matters
-${r.oneLiner}. This knowledge base covers the essential primitives a practitioner needs to use ${r.targetName} effectively in production, with live-verified POCs demonstrating each capability.
+${r.oneLiner}. This knowledge base covers the essential primitives a practitioner needs to use ${r.targetName} effectively in production, with hands-on examples demonstrating each capability.
 `);
 
             writeIfNew(join(stageDir, "scope.md"), `# Scope
@@ -224,7 +224,7 @@ ${r.oneLiner}. This knowledge base covers the essential primitives a practitione
 - Custom deployment topologies
 
 ## Boundaries
-This knowledge base focuses on ${r.targetName} fundamentals through L0–L5 live-verified POCs.
+This knowledge base focuses on ${r.targetName} fundamentals through L0–L5 hands-on examples.
 `);
 
             writeIfNew(join(stageDir, "versions.md"), `# Versions

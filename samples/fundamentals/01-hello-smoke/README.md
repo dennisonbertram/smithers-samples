@@ -25,7 +25,7 @@ sqlite3 smithers.db "SELECT * FROM hello;"
 
 ## Expected output
 
-The CLI prints the workflow completion and the task output. The `hello` table in `smithers.db` holds the persisted row:
+Example output — the CLI prints the workflow completion and the task output. The `hello` table in `smithers.db` holds the persisted row:
 
 ```
 # CLI (approximate)
@@ -34,14 +34,8 @@ The CLI prints the workflow completion and the task output. The `hello` table in
 # SQLite
 runId        taskId  output
 -----------  ------  -------------------------
-33c1e1ed...  greet   {"message":"Hello, World"}
+<run-id>...  greet   {"message":"Hello, World"}
 ```
-
-Verified output: run `33c1e1ed` (runId prefix from a live execution against smithers-orchestrator 0.24.2).
-
-## What it proves
-
-Smithers executes a pinned TypeScript/TSX workflow from the CLI and writes every task result to SQLite without any remote provider or API key. Verified in run `33c1e1ed` on smithers-orchestrator 0.24.2.
 
 ## How it works
 

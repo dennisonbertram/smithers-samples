@@ -24,7 +24,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 bun test src/slugify.test.ts
 
 # Run the workflow
-bunx --bun smithers-orchestrator up workflow.tsx --run-id uc1-fix-run-1
+bunx --bun smithers-orchestrator up workflow.tsx --run-id fix-run-1
 
 # Confirm tests are now GREEN (5 pass, 0 fail)
 bun test src/slugify.test.ts
@@ -56,7 +56,7 @@ sqlite3 smithers.db \
 
 ## Expected output
 
-Clean run (`uc1-fix-run-1`) completes in one loop iteration (~24 s):
+Example output (one loop iteration, ~24 s):
 
 ```
 [00:00:00] → implement (attempt 1, iteration 0)
@@ -64,17 +64,17 @@ Clean run (`uc1-fix-run-1`) completes in one loop iteration (~24 s):
 [00:00:24] → run-tests (attempt 1, iteration 0)
 [00:00:24] ✓ run-tests (attempt 1)
 [00:00:24] ✓ Run finished
-{"runId":"uc1-fix-run-1","status":"finished"}
+{"runId":"fix-run-1","status":"finished"}
 ```
 
 Key SQLite rows after the run:
 
 ```
 -- implement_result
-uc1-fix-run-1|implement|0|Fixed the bug in src/slugify.ts by changing the replace pattern for spaces from '+' to '-' on line 22...|["src/slugify.ts"]
+fix-run-1|implement|0|Fixed the bug in src/slugify.ts by changing the replace pattern for spaces from '+' to '-' on line 22...|["src/slugify.ts"]
 
 -- test_result
-uc1-fix-run-1|run-tests|0|1|5|0
+fix-run-1|run-tests|0|1|5|0
 -- columns: run_id | node_id | iteration | passed | pass_count | fail_count
 ```
 
@@ -85,14 +85,6 @@ uc1-resume-demo | implement | 0 | 1 | cancelled   ← the killed attempt
 uc1-resume-demo | implement | 0 | 2 | finished    ← resumed, new attempt
 uc1-resume-demo | run-tests | 0 | 1 | finished
 ```
-
-## What it proves
-
-Verified run `uc1-fix-run-1` (live, 2026-06-17):
-
-- Tests start at **1 pass / 4 fail** and end at **5 pass / 0 fail** in a single loop iteration.
-- The agent made a minimal, correct one-character fix (`+` → `-`) without touching the test file.
-- Durable resume (run `uc1-resume-demo`): after a `kill -9`, Smithers marked attempt 1 as `cancelled` and created attempt 2 on resume — without re-executing already-finished work.
 
 ## How it works
 

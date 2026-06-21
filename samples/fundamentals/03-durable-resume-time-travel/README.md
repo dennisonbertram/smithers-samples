@@ -21,14 +21,14 @@ This matters because it proves the core durability guarantee: SQLite is the sing
 bun install
 
 # Step 1: start the run with a stable run-id, let it run in background
-bunx --bun smithers-orchestrator up durability.tsx --run-id "l2-durability-poc-002" &
+bunx --bun smithers-orchestrator up durability.tsx --run-id "durable-demo" &
 SMITHERS_PID=$!
 
 # Step 2: wait until task-a-static is finished, then SIGKILL mid-Task-B
 # (SIGTERM does NOT stop Bun — you must use kill -9)
 while true; do
   STATE=$(sqlite3 smithers.db \
-    "SELECT state FROM _smithers_nodes WHERE run_id='l2-durability-poc-002' AND node_id='task-a-static';")
+    "SELECT state FROM _smithers_nodes WHERE run_id='durable-demo' AND node_id='task-a-static';")
   [ "$STATE" = "finished" ] && break
   sleep 1
 done
@@ -36,24 +36,24 @@ kill -9 $SMITHERS_PID
 
 # Step 3: inspect pre-resume state
 sqlite3 smithers.db \
-  "SELECT node_id, state FROM _smithers_nodes WHERE run_id='l2-durability-poc-002';"
+  "SELECT node_id, state FROM _smithers_nodes WHERE run_id='durable-demo';"
 # task-a-static | finished
 # task-b-slow   | in-progress   (killed, no output row yet)
 
 # Step 4: wait for heartbeat to expire (~35s), then resume
 sleep 35
 bunx --bun smithers-orchestrator up durability.tsx \
-  --run-id "l2-durability-poc-002" --resume true
+  --run-id "durable-demo" --resume true
 
 # Step 5: view the frame timeline
-bunx --bun smithers-orchestrator timeline l2-durability-poc-002
+bunx --bun smithers-orchestrator timeline durable-demo
 
 # Step 6: fork from frame 2 (just after Task A finished)
 bunx --bun smithers-orchestrator fork durability.tsx \
-  --run-id l2-durability-poc-002 --frame 2 --label "fork-from-frame-2"
+  --run-id durable-demo --frame 2 --label "fork-from-frame-2"
 
 # Step 7: view timeline with fork tree
-bunx --bun smithers-orchestrator timeline l2-durability-poc-002 --tree
+bunx --bun smithers-orchestrator timeline durable-demo --tree
 ```
 
 > Note: Smithers requires a git repo in the working directory. Run `git init` first if you are working outside a git repo.
@@ -66,7 +66,7 @@ Resume CLI (task-a-static does not appear — it is skipped):
 [00:00:00] → task-b-slow (attempt 2, iteration 0)
 [00:01:00] ✓ task-b-slow (attempt 2)
 [00:01:00] ✓ Run finished
-runId: l2-durability-poc-002
+runId: durable-demo
 status: finished
 ```
 
@@ -80,7 +80,7 @@ task-b-slow   | state=finished | last_attempt=2      (attempt 1 cancelled, attem
 Timeline with fork tree:
 
 ```
-l2-durability-poc-002
+durable-demo
   Frame 1  2026-06-17 14:16:38Z  3d1b0810
   Frame 2  2026-06-17 14:16:38Z  88f2fb2f
   |-- 01eb00fa-994 [fork-from-frame-2] (forked at frame 2)
@@ -89,16 +89,6 @@ l2-durability-poc-002
   Frame 5  2026-06-17 14:18:55Z  480d91d4
   Frame 6  2026-06-17 14:18:55Z  480d91d4
 ```
-
-## What it proves
-
-Verified run `l2-durability-poc-002`:
-
-- `task-a-static` accumulated exactly 1 attempt (state=finished). It was not re-run on resume.
-- `task-b-slow` accumulated 2 attempts: attempt 1 retroactively marked `cancelled` after resume, attempt 2 `finished`.
-- The `step_a` output row (`Task A complete | 2026-06-17T14:16:38.637Z`) was unchanged after resume.
-- `step_b` output row was empty before resume; populated after attempt 2 (`Task B complete after sleep | elapsed_ms=59998`).
-- `fork --frame 2` produced child run `01eb00fa-9945-4425-b4c1-02a8ec38f11e`, branching from the frame hash recorded just after Task A completed.
 
 ## How it works
 
