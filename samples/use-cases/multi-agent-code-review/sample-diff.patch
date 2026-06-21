@@ -1,0 +1,23 @@
+--- a/discount.js
++++ b/discount.js
+@@ -1,22 +1,30 @@
+-// Applies a percentage discount to a price
+-function applyDiscount(price, pct) {
+-  if (pct > 100) throw new Error("invalid");
+-  const discount = price * (pct / 100);
+-  return price - discount;
+-}
++// BUG A (correctness): returns discount amount, not discounted price; also no guard for pct<0
++var applyDiscount = function(price, pct) {         // BUG C (style): var, no JSDoc, 140-char lines
++  if (pct > 100) throw new Error("invalid pct");  // missing guard: pct < 0 not checked
++  const discount = price * (pct / 100)             // BUG C: missing semicolon
++  return discount                                  // BUG A: should return price - discount, not discount
++}
++
++// BUG B (security): SQL injection via template literal + credential logging
++var getUserDiscount = async function(userId, req) {
++  const query = `SELECT * FROM users WHERE id = ${userId}` // BUG B: SQL injection
++  console.log("Authorization token", req.headers.authorization) // BUG B: logs credential
++  const result = await db.query(query)
++  return result.rows[0]?.discount_pct ?? 0                                                          // very long line exceeding 140 chars for style check
++}

@@ -1,0 +1,7 @@
+{
+  "name": "smithers-sample-control-flow-hitl-memory",
+  "private": true,
+  "type": "module",
+  "dependencies": { "smithers-orchestrator": "0.24.2", "zod": "^4" },
+  "devDependencies": { "@types/bun": "latest", "typescript": "latest" }
+}

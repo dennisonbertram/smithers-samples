@@ -1,0 +1,20 @@
+[
+  {
+    "id": "greet-alice-english",
+    "name": "Greet Alice in English",
+    "input": { "name": "Alice", "language": "English" },
+    "expected": {
+      "status": "finished",
+      "outputContains": { "greeting": [{ "language": "English" }] }
+    }
+  },
+  {
+    "id": "greet-carlos-spanish",
+    "name": "Greet Carlos in Spanish",
+    "input": { "name": "Carlos", "language": "Spanish" },
+    "expected": {
+      "status": "finished",
+      "outputContains": { "greeting": [{ "language": "Spanish" }] }
+    }
+  }
+]
